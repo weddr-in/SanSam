@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "WebSearch",
+      "WebFetch(domain:openrouter.ai)",
+      "Bash(node test-supabase.js:*)",
+      "Bash(node:*)",
+      "Bash(git restore:*)",
+      "Bash(curl:*)",
+      "Bash(dir:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(ls:*)",
+      "Bash(findstr:*)",
+      "Bash(git log:*)",
+      "Bash(while read hash)",
+      "Bash(do if git show $hash)",
+      "Bash(then echo $hash)",
+      "Bash(break)",
+      "Bash(fi:*)",
+      "Bash(done)",
+      "Bash(find:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npx tsc:*)",
+      "Bash(claude mcp add:*)",
+      "WebFetch(domain:produkto.io)",
+      "Bash(python:*)"
+    ]
+  }
+}

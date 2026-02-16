@@ -1,0 +1,8 @@
+{
+  "name": "Sanjana & Samartha | Sacred Union",
+  "description": "A spiritual, elegant digital experience for the sacred union of Sanjana and Samartha. Featuring light spiritual aesthetics with lotus and mandala motifs.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

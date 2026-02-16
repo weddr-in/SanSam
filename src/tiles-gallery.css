@@ -1,0 +1,366 @@
+/* ===== VISUAL ARCHIVE — Infinite Marquee Gallery ===== */
+
+.visual-archive-section {
+    position: relative;
+    background: linear-gradient(180deg, #0a0808 0%, #111 10%, #0d0b0a 90%, #0a0808 100%);
+    overflow: hidden;
+    height: 100vh;
+    max-height: 100vh;
+}
+
+/* --- Header — positioned in the bottom-left empty corner --- */
+.visual-archive-header {
+    position: absolute;
+    z-index: 20;
+    top: 3rem;
+    left: 3rem;
+    text-align: left;
+    pointer-events: none;
+}
+
+.visual-archive-label {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.8em;
+    text-transform: uppercase;
+    color: rgba(212, 175, 55, 0.5);
+    margin-bottom: 0.6rem;
+}
+
+.visual-archive-title {
+    font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 300;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+    margin: 0;
+    text-shadow: 0 0 40px rgba(212, 175, 55, 0.08);
+}
+
+/* --- Marquee Container --- */
+.marquee-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 1rem 0;
+    overflow: hidden;
+    /* Tilted grid — matching original aesthetic */
+    width: 150%;
+    margin-left: -25%;
+    transform: rotate(-22.5deg);
+    transform-origin: center center;
+}
+
+/* --- Marquee Row --- */
+.marquee-row {
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+    mask-image: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+
+.marquee-track {
+    display: flex;
+    gap: 12px;
+    will-change: transform;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+/* Scroll direction variants */
+.marquee-track--left {
+    animation-name: marquee-scroll-left;
+}
+
+.marquee-track--right {
+    animation-name: marquee-scroll-right;
+}
+
+/* Speed variants — very slow, luxurious pace */
+.marquee-track--speed-1 {
+    animation-duration: 120s;
+}
+
+.marquee-track--speed-2 {
+    animation-duration: 150s;
+}
+
+.marquee-track--speed-3 {
+    animation-duration: 100s;
+}
+
+.marquee-track--speed-4 {
+    animation-duration: 130s;
+}
+
+/* Pause on section hover */
+.marquee-gallery:hover .marquee-track {
+    animation-play-state: paused;
+}
+
+@keyframes marquee-scroll-left {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+@keyframes marquee-scroll-right {
+    0% {
+        transform: translateX(-50%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+/* --- Image Tiles --- */
+.marquee-tile {
+    flex: none;
+    width: 240px;
+    height: 160px;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.marquee-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(0, 0, 0, 0.3) 100%);
+    z-index: 1;
+    transition: opacity 0.4s;
+    pointer-events: none;
+}
+
+.marquee-tile:hover {
+    border-color: rgba(212, 175, 55, 0.3);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.08), 0 8px 32px rgba(0, 0, 0, 0.4);
+    transform: scale(1.03);
+    z-index: 2;
+}
+
+.marquee-tile:hover::before {
+    opacity: 0;
+}
+
+.marquee-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.5s;
+    filter: brightness(0.85) saturate(0.9);
+}
+
+.marquee-tile:hover img {
+    transform: scale(1.08);
+    filter: brightness(1) saturate(1.05);
+}
+
+/* ===== LIGHTBOX ===== */
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.lightbox-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.lightbox-image-wrapper {
+    position: relative;
+    max-width: 90vw;
+    max-height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: lightbox-zoom-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes lightbox-zoom-in {
+    from {
+        transform: scale(0.92);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.lightbox-image {
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+/* Lightbox Controls */
+.lightbox-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 10001;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    backdrop-filter: blur(8px);
+}
+
+.lightbox-close:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    transform: rotate(90deg);
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10001;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    backdrop-filter: blur(8px);
+}
+
+.lightbox-nav:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+.lightbox-nav--prev {
+    left: 1.5rem;
+}
+
+.lightbox-nav--next {
+    right: 1.5rem;
+}
+
+.lightbox-counter {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: rgba(255, 255, 255, 0.4);
+    z-index: 10001;
+    user-select: none;
+}
+
+/* ===== RESPONSIVE ===== */
+@media screen and (max-width: 768px) {
+    .visual-archive-header {
+        top: auto;
+        left: auto;
+        bottom: 6rem;
+        right: 1.5rem;
+        text-align: right;
+    }
+
+    .visual-archive-title {
+        font-size: 1.6rem;
+    }
+
+    .marquee-gallery {
+        gap: 8px;
+    }
+
+    .marquee-tile {
+        width: 180px;
+        height: 130px;
+        border-radius: 4px;
+    }
+
+    .marquee-track--speed-1 {
+        animation-duration: 80s;
+    }
+
+    .marquee-track--speed-2 {
+        animation-duration: 100s;
+    }
+
+    .marquee-track--speed-3 {
+        animation-duration: 70s;
+    }
+
+    .marquee-track--speed-4 {
+        animation-duration: 90s;
+    }
+
+    .lightbox-nav {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .lightbox-nav--prev {
+        left: 0.75rem;
+    }
+
+    .lightbox-nav--next {
+        right: 0.75rem;
+    }
+
+    .lightbox-close {
+        top: 1rem;
+        right: 1rem;
+        width: 38px;
+        height: 38px;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .marquee-tile {
+        width: 340px;
+        height: 240px;
+    }
+}
