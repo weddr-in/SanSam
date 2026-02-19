@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Music, Plus, Check, Disc, Loader2, Trophy, Flame, Droplets, Sparkles, Zap, Heart, Activity } from 'lucide-react';
+import { Search, Music, Plus, Check, Disc, Loader2, Trophy, Droplets, Sparkles, Zap, Heart, Activity } from 'lucide-react';
 import { supabase } from '../src/lib/supabase';
 import { searchTracks, getClientAccessToken } from '../lib/spotify';
 
@@ -21,10 +21,9 @@ interface Request {
     vote_count: number;
 }
 
-type EventId = 'sangeet' | 'reception' | 'muhurtham';
+type EventId = 'reception' | 'muhurtham';
 
 const EVENTS: { id: EventId; label: string; icon: React.ReactNode; color: string }[] = [
-    { id: 'sangeet', label: 'Sangeet', icon: <Flame size={16} />, color: '#FF4500' },
     { id: 'reception', label: 'Reception', icon: <Droplets size={16} />, color: '#0047AB' },
     { id: 'muhurtham', label: 'Muhurtham', icon: <Sparkles size={16} />, color: '#FFD700' },
 ];
@@ -44,7 +43,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export const MusicSection: React.FC = () => {
     // State
-    const [selectedEvent, setSelectedEvent] = useState<EventId>('sangeet');
+    const [selectedEvent, setSelectedEvent] = useState<EventId>('reception');
     const [query, setQuery] = useState('');
     const debouncedQuery = useDebounce(query, 500); // 500ms delay for instant search
     const [results, setResults] = useState<Track[]>([]);

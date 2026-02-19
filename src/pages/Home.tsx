@@ -10,6 +10,7 @@ import { FloatingMuteButton } from '../../components/FloatingMuteButton';
 import { Preloader } from '../../components/Preloader';
 import { MusicSection } from '../../components/MusicSection';
 import { AIConciergeFAB } from '../../components/AIConciergeFAB';
+import { PurposesSection } from '../../components/PurposesSection';
 
 
 import { EventDetails } from '../../types';
@@ -97,11 +98,11 @@ export const Home: React.FC = () => {
         }
     }, []);
 
-    // 3. Safety Timeout (7s) - Force load if something gets stuck
+    // 3. Safety Timeout (12s) - Allow enough time for video (10s) before forcing load
     React.useEffect(() => {
         const safetyTimer = setTimeout(() => {
             setIsLoading(false);
-        }, 7000);
+        }, 12000);
         return () => clearTimeout(safetyTimer);
     }, []);
 
@@ -141,12 +142,18 @@ export const Home: React.FC = () => {
             {/* Background Music - Disabled as video now has its own audio */}
             {/* <BackgroundMusic isMuted={isMuted} /> */}
 
+
+
+            // Inside Home component return:
             {/* Events Section */}
             <section id="itinerary" className="relative z-20">
                 {EVENTS.map((event, index) => (
                     <EventSection key={event.id} event={event} index={index} />
                 ))}
             </section>
+
+            {/* Purposes of SanSam */}
+            <PurposesSection />
 
 
 

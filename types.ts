@@ -40,6 +40,7 @@ export interface RSVPData {
   attending_reception: boolean;
   attending_muhurtha: boolean;
   side?: 'bride' | 'groom';
+  ecoConsent?: boolean;
   submittedAt?: string;
 }
 

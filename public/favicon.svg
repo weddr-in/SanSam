@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <style>
+    path, text { fill: #000000; }
+    @media (prefers-color-scheme: dark) {
+      path, text { fill: #ffffff; }
+    }
+  </style>
+  <text x="50" y="70" font-family="'Times New Roman', serif" font-size="70" text-anchor="middle" font-weight="bold">S&amp;S</text>
+</svg>

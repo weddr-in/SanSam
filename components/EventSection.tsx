@@ -24,7 +24,7 @@ const getThemeImages = (theme: string) => {
         case 'water': // Reception
         case 'evening': // Reception (New)
             return [
-                '/assets/Logo.png', // Main - Logo
+                'https://wciudwliwmxfmevbzzfc.supabase.co/storage/v1/object/public/pics/2.png', // Main - Reception Theme
                 'https://i.pinimg.com/736x/50/98/d5/5098d572253026ca72aa9b9068fc5375.jpg',
                 'https://i.pinimg.com/736x/1f/c0/f7/1fc0f7d2b625675f15ef7f3e3d85792d.jpg',
                 'https://i.pinimg.com/1200x/44/be/e0/44bee017474534afe3c77cba6b2053bc.jpg',
@@ -999,236 +999,160 @@ export const EventSection: React.FC<EventSectionProps> = ({ event, index }) => {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
                                 transition={{ delay: 0.3 }}
-                                className="absolute top-8 left-1/2 -translate-x-1/2 z-50"
+                                className="absolute top-8 left-8 z-50 flex items-center gap-4"
                             >
-                                <div className="relative px-8 py-3.5 rounded-full bg-white/5 backdrop-blur-2xl border border-white/10 shadow-2xl">
-                                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/10 via-white/5 to-white/10 opacity-50" />
-                                    <span className="relative font-mono text-sm text-white/90 tracking-wider">
-                                        {desktopGalleryIndex + 1} <span className="text-white/40 mx-1.5">/</span> {images.length}
-                                    </span>
+                                <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 backdrop-blur-xl border border-white/10">
+                                    <span className="font-mono text-2xl text-white font-light">{String(desktopGalleryIndex + 1).padStart(2, '0')}</span>
+                                    <div className="w-8 h-[1px] bg-white/30" />
+                                    <span className="font-mono text-sm text-white/40">{String(images.length).padStart(2, '0')}</span>
                                 </div>
+                                <span className="font-serif italic text-white/30 text-lg">{event.title}</span>
                             </motion.div>
 
-                            {/* Event Title - Enhanced */}
+                            {/* Zoom Controls */}
                             <motion.div
-                                initial={{ opacity: 0, x: -30 }}
+                                initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -30 }}
-                                transition={{ delay: 0.25, type: "spring", stiffness: 150, damping: 20 }}
-                                className="absolute top-8 left-8 z-50"
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ delay: 0.4 }}
+                                className="absolute top-8 right-28 z-50 flex flex-col gap-2"
                             >
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-1 h-1 rounded-full bg-white/40" />
-                                    <span className={`font-sans text-[10px] tracking-[0.4em] uppercase ${getThemeAccent(event.theme)}`}>
-                                        {event.theme}
-                                    </span>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); zoomIn(); }}
+                                    className="w-12 h-12 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/30 transition-all duration-300 group"
+                                    aria-label="Zoom in"
+                                >
+                                    <ZoomIn size={18} className="text-white/60 group-hover:text-white transition-colors" />
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); zoomOut(); }}
+                                    className="w-12 h-12 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/30 transition-all duration-300 group"
+                                    aria-label="Zoom out"
+                                >
+                                    <ZoomOut size={18} className="text-white/60 group-hover:text-white transition-colors" />
+                                </button>
+                                <div className="text-center mt-1">
+                                    <span className="font-mono text-[10px] text-white/30">{Math.round(imageZoom * 100)}%</span>
                                 </div>
-                                <h3 className="font-display text-4xl text-white/95 tracking-tight">
-                                    {event.title}
-                                </h3>
-                                <p className="font-serif italic text-sm text-white/40 mt-2">
-                                    Moodboard Gallery
-                                </p>
                             </motion.div>
 
-                            {/* Main Image Container - Enhanced */}
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                transition={{ delay: 0.1 }}
-                                className="relative w-full h-full flex items-center justify-center p-32"
+                            {/* Navigation Arrows - Left */}
+                            <motion.button
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ delay: 0.3 }}
+                                onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                                className="absolute left-8 top-1/2 -translate-y-1/2 z-50 w-16 h-16 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/30 hover:scale-110 transition-all duration-300 group shadow-2xl"
+                                aria-label="Previous image"
+                            >
+                                <ChevronLeft size={28} className="text-white/60 group-hover:text-white transition-colors" strokeWidth={1.5} />
+                                <div className="absolute inset-0 rounded-full bg-white/0 group-hover:bg-white/5 blur-xl transition-all duration-300" />
+                            </motion.button>
+
+                            {/* Navigation Arrows - Right */}
+                            <motion.button
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ delay: 0.3 }}
+                                onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                                className="absolute right-8 top-1/2 -translate-y-1/2 z-50 w-16 h-16 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/30 hover:scale-110 transition-all duration-300 group shadow-2xl"
+                                aria-label="Next image"
+                            >
+                                <ChevronRight size={28} className="text-white/60 group-hover:text-white transition-colors" strokeWidth={1.5} />
+                                <div className="absolute inset-0 rounded-full bg-white/0 group-hover:bg-white/5 blur-xl transition-all duration-300" />
+                            </motion.button>
+
+                            {/* Main Image Container */}
+                            <div
+                                className="relative w-full h-full flex items-center justify-center p-20"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                {/* Image Glow Effect */}
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <div className="w-[60%] h-[60%] bg-gradient-radial from-white/10 via-transparent to-transparent blur-3xl opacity-20" />
-                                </div>
-
                                 <AnimatePresence mode="wait">
                                     <motion.div
                                         key={desktopGalleryIndex}
-                                        initial={{ opacity: 0, scale: 0.92, y: 20 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        exit={{ opacity: 0, scale: 0.92, y: -20 }}
-                                        transition={{
-                                            duration: 0.7,
-                                            ease: [0.43, 0.13, 0.23, 0.96]
+                                        initial={{ opacity: 0, scale: 0.9, rotateY: isEven ? -15 : 15 }}
+                                        animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                                        exit={{ opacity: 0, scale: 0.9, rotateY: isEven ? 15 : -15 }}
+                                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                        className="relative max-w-full max-h-full"
+                                        style={{
+                                            transform: `scale(${imageZoom})`,
+                                            transition: 'transform 0.3s ease'
                                         }}
-                                        className="relative"
                                     >
-                                        {/* Image Frame/Border Effect */}
-                                        <div className="absolute -inset-4 bg-gradient-to-br from-white/10 via-white/5 to-transparent rounded-2xl blur-xl opacity-50" />
-
-                                        <motion.img
+                                        <img
                                             src={images[desktopGalleryIndex]}
                                             alt={`${event.title} - Image ${desktopGalleryIndex + 1}`}
-                                            animate={{ scale: imageZoom }}
-                                            transition={{ duration: 0.3, ease: "easeOut" }}
-                                            className="relative max-w-[85vw] max-h-[70vh] object-contain rounded-xl shadow-[0_20px_100px_rgba(0,0,0,0.7)] border border-white/10"
-                                            style={{
-                                                transformOrigin: 'center',
-                                                cursor: imageZoom > 1 ? 'grab' : 'default'
-                                            }}
-                                            draggable={false}
+                                            className="max-w-full max-h-[80vh] object-contain rounded-sm shadow-2xl"
                                         />
+                                        {/* Subtle border glow */}
+                                        <div className="absolute inset-0 rounded-sm shadow-[0_0_100px_rgba(255,255,255,0.1)] pointer-events-none" />
                                     </motion.div>
                                 </AnimatePresence>
-                            </motion.div>
+                            </div>
 
-                            {/* Navigation Arrows - Enhanced */}
-                            {images.length > 1 && (
-                                <>
-                                    <motion.button
-                                        initial={{ opacity: 0, x: -30 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -30 }}
-                                        transition={{ delay: 0.3, type: "spring", stiffness: 150, damping: 20 }}
-                                        whileHover={{ scale: 1.1, x: -5 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                                        className="absolute left-12 top-1/2 -translate-y-1/2 z-50 w-16 h-16 rounded-full bg-white/5 backdrop-blur-2xl border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/30 transition-all duration-300 group shadow-2xl"
-                                        aria-label="Previous image"
-                                    >
-                                        <ChevronLeft size={30} className="text-white/70 group-hover:text-white transition-colors -ml-0.5" strokeWidth={1.5} />
-                                        <div className="absolute inset-0 rounded-full bg-white/0 group-hover:bg-white/5 blur-xl transition-all duration-300" />
-                                    </motion.button>
-
-                                    <motion.button
-                                        initial={{ opacity: 0, x: 30 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: 30 }}
-                                        transition={{ delay: 0.3, type: "spring", stiffness: 150, damping: 20 }}
-                                        whileHover={{ scale: 1.1, x: 5 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={(e) => { e.stopPropagation(); nextImage(); }}
-                                        className="absolute right-12 top-1/2 -translate-y-1/2 z-50 w-16 h-16 rounded-full bg-white/5 backdrop-blur-2xl border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/30 transition-all duration-300 group shadow-2xl"
-                                        aria-label="Next image"
-                                    >
-                                        <ChevronRight size={30} className="text-white/70 group-hover:text-white transition-colors -mr-0.5" strokeWidth={1.5} />
-                                        <div className="absolute inset-0 rounded-full bg-white/0 group-hover:bg-white/5 blur-xl transition-all duration-300" />
-                                    </motion.button>
-                                </>
-                            )}
-
-                            {/* Zoom Controls - Enhanced */}
+                            {/* Thumbnail Navigation Bar */}
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 20 }}
-                                transition={{ delay: 0.4, type: "spring", stiffness: 150, damping: 20 }}
-                                className="absolute bottom-8 right-8 z-50 flex gap-2"
-                                onClick={(e) => e.stopPropagation()}
+                                transition={{ delay: 0.4 }}
+                                className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50"
                             >
-                                <motion.button
-                                    onClick={zoomOut}
-                                    disabled={imageZoom <= 1}
-                                    whileHover={{ scale: imageZoom > 1 ? 1.05 : 1 }}
-                                    whileTap={{ scale: imageZoom > 1 ? 0.95 : 1 }}
-                                    className="w-14 h-14 rounded-full bg-white/5 backdrop-blur-2xl border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/30 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed group shadow-2xl"
-                                    aria-label="Zoom out"
-                                >
-                                    <ZoomOut size={20} className="text-white/70 group-hover:text-white transition-colors" strokeWidth={1.5} />
-                                </motion.button>
-                                <div className="px-5 py-3.5 rounded-full bg-white/5 backdrop-blur-2xl border border-white/10 flex items-center justify-center min-w-[80px] shadow-2xl">
-                                    <span className="font-mono text-sm text-white/90 tracking-wider">{Math.round(imageZoom * 100)}%</span>
-                                </div>
-                                <motion.button
-                                    onClick={zoomIn}
-                                    disabled={imageZoom >= 3}
-                                    whileHover={{ scale: imageZoom < 3 ? 1.05 : 1 }}
-                                    whileTap={{ scale: imageZoom < 3 ? 0.95 : 1 }}
-                                    className="w-14 h-14 rounded-full bg-white/5 backdrop-blur-2xl border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/30 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed group shadow-2xl"
-                                    aria-label="Zoom in"
-                                >
-                                    <ZoomIn size={20} className="text-white/70 group-hover:text-white transition-colors" strokeWidth={1.5} />
-                                </motion.button>
-                            </motion.div>
-
-                            {/* Thumbnail Navigation - Enhanced & Perfectly Centered */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 30 }}
-                                transition={{ delay: 0.4, type: "spring", stiffness: 150, damping: 25 }}
-                                className="absolute bottom-8 left-0 right-0 z-50 flex justify-center items-center"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <div className="relative px-5 py-4 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-2xl">
-                                    {/* Subtle gradient overlay */}
-                                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/5 via-white/10 to-white/5 opacity-50 pointer-events-none" />
-
-                                    <div className="relative flex items-center justify-center gap-3">
-                                        {images.map((img, idx) => (
-                                            <motion.button
-                                                key={idx}
-                                                onClick={() => { setDesktopGalleryIndex(idx); setImageZoom(1); }}
-                                                initial={{ opacity: 0, scale: 0.8 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                transition={{ delay: 0.5 + idx * 0.05 }}
-                                                whileHover={{
-                                                    scale: idx === desktopGalleryIndex ? 1.15 : 1.1,
-                                                    y: -4
-                                                }}
-                                                whileTap={{ scale: 0.95 }}
-                                                className={`relative flex-shrink-0 rounded-xl overflow-hidden transition-all duration-500 ${idx === desktopGalleryIndex
-                                                    ? 'w-20 h-20 ring-2 ring-white/90 shadow-[0_0_20px_rgba(255,255,255,0.3)]'
-                                                    : 'w-16 h-16 ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/40'
-                                                    }`}
-                                            >
-                                                {/* Active indicator */}
-                                                {idx === desktopGalleryIndex && (
-                                                    <motion.div
-                                                        layoutId="activeThumb"
-                                                        className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none"
-                                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                                    />
-                                                )}
-
-                                                <img
-                                                    src={img}
-                                                    alt={`Thumbnail ${idx + 1}`}
-                                                    className="w-full h-full object-cover"
+                                <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10">
+                                    {images.map((img, i) => (
+                                        <motion.button
+                                            key={i}
+                                            onClick={(e) => { e.stopPropagation(); setDesktopGalleryIndex(i); setImageZoom(1); }}
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            className={`relative overflow-hidden rounded-lg transition-all duration-300 ${
+                                                i === desktopGalleryIndex
+                                                    ? 'w-20 h-20 ring-2 ring-white shadow-[0_0_20px_rgba(255,255,255,0.3)]'
+                                                    : 'w-16 h-16 opacity-50 hover:opacity-80'
+                                            }`}
+                                            aria-label={`Go to image ${i + 1}`}
+                                        >
+                                            <img
+                                                src={img}
+                                                alt={`Thumbnail ${i + 1}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                            {i === desktopGalleryIndex && (
+                                                <motion.div
+                                                    layoutId="activeThumbnail"
+                                                    className="absolute inset-0 border-2 border-white rounded-lg"
+                                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                                 />
-
-                                                {/* Overlay gradient on inactive thumbnails */}
-                                                {idx !== desktopGalleryIndex && (
-                                                    <div className="absolute inset-0 bg-black/20" />
-                                                )}
-                                            </motion.button>
-                                        ))}
-                                    </div>
+                                            )}
+                                        </motion.button>
+                                    ))}
                                 </div>
                             </motion.div>
 
-                            {/* Keyboard Shortcuts Hint - Enhanced */}
+                            {/* Keyboard Shortcuts Hint */}
                             <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                transition={{ delay: 0.6, type: "spring", stiffness: 150, damping: 20 }}
-                                className="absolute bottom-8 left-8 z-50"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.5 }}
+                                className="absolute bottom-8 right-8 z-50 hidden md:flex items-center gap-4 text-white/20 font-mono text-xs"
                             >
-                                <div className="px-5 py-3 rounded-xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-2xl">
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="px-2 py-1 rounded bg-white/10 border border-white/20">
-                                                <span className="font-mono text-[10px] text-white/90">←</span>
-                                            </div>
-                                            <div className="px-2 py-1 rounded bg-white/10 border border-white/20">
-                                                <span className="font-mono text-[10px] text-white/90">→</span>
-                                            </div>
-                                            <span className="font-sans text-[10px] text-white/50 uppercase tracking-wider">Navigate</span>
-                                        </div>
-                                        <div className="w-px h-4 bg-white/20" />
-                                        <div className="flex items-center gap-2">
-                                            <div className="px-2 py-1 rounded bg-white/10 border border-white/20">
-                                                <span className="font-mono text-[10px] text-white/90">ESC</span>
-                                            </div>
-                                            <span className="font-sans text-[10px] text-white/50 uppercase tracking-wider">Close</span>
-                                        </div>
-                                    </div>
-                                </div>
+                                <span className="flex items-center gap-2">
+                                    <kbd className="px-2 py-1 rounded bg-white/5 border border-white/10">←</kbd>
+                                    <kbd className="px-2 py-1 rounded bg-white/5 border border-white/10">→</kbd>
+                                    <span>Navigate</span>
+                                </span>
+                                <span className="flex items-center gap-2">
+                                    <kbd className="px-2 py-1 rounded bg-white/5 border border-white/10">+</kbd>
+                                    <kbd className="px-2 py-1 rounded bg-white/5 border border-white/10">-</kbd>
+                                    <span>Zoom</span>
+                                </span>
+                                <span className="flex items-center gap-2">
+                                    <kbd className="px-2 py-1 rounded bg-white/5 border border-white/10">ESC</kbd>
+                                    <span>Close</span>
+                                </span>
                             </motion.div>
                         </motion.div>
                     )}
@@ -1237,3 +1161,5 @@ export const EventSection: React.FC<EventSectionProps> = ({ event, index }) => {
         </>
     );
 };
+
+export default EventSection;

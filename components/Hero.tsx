@@ -31,15 +31,15 @@ export const Hero: React.FC<HeroProps> = ({ isMuted, toggleMute, onVideoReady })
     const player = new Player(iframeRef.current);
     playerRef.current = player;
 
-    // Fallback timer - 8 seconds (only if video completely fails to load)
-    // Preloader stays visible until video actually plays
+    // Fallback timer - 10 seconds (optimized for mobile network)
+    // Preloader stays visible until video actually plays OR timeout occurs
     const fallbackTimer = setTimeout(() => {
       if (!videoLoadedRef.current) {
-        console.warn('Vimeo video failed to load after 8s, showing fallback image');
+        console.warn('Vimeo video failed to load after 10s, showing fallback image');
         setVideoFailed(true);
         onVideoReady(); // Clear preloader only on failure
       }
-    }, 8000);
+    }, 10000);
 
     // Event: Video started playing - success! Clear preloader
     player.on('play', () => {

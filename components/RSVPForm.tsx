@@ -13,6 +13,7 @@ interface RSVPFormProps {
     attending_reception: boolean;
     attending_muhurtha: boolean;
     side?: 'bride' | 'groom';
+    ecoConsent: boolean;
   };
   errors: Record<string, string>;
   isSubmitting: boolean;
@@ -45,9 +46,8 @@ export function RSVPForm({
           onChange={(e) => onFieldChange('name', e.target.value)}
           disabled={isSubmitting}
           placeholder="Enter your name"
-          className={`w-full bg-transparent px-4 py-3 border-b ${
-            errors.name ? 'border-red-500/50' : 'border-white/10'
-          } text-white font-sans transition-colors duration-300 focus:outline-none focus:border-white/40 disabled:opacity-50 disabled:cursor-not-allowed`}
+          className={`w-full bg-transparent px-4 py-3 border-b ${errors.name ? 'border-red-500/50' : 'border-white/10'
+            } text-white font-sans transition-colors duration-300 focus:outline-none focus:border-white/40 disabled:opacity-50 disabled:cursor-not-allowed`}
           maxLength={100}
         />
         {errors.name && (
@@ -79,11 +79,10 @@ export function RSVPForm({
             type="button"
             onClick={() => onFieldChange('attending', true)}
             disabled={isSubmitting}
-            className={`flex-1 py-3 px-6 border transition-all duration-300 min-h-[44px] ${
-              formData.attending
-                ? 'bg-white/10 border-white/40 text-white'
-                : 'border-white/10 text-white/40 hover:border-white/20'
-            } font-sans text-[10px] tracking-[0.2em] uppercase disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`flex-1 py-3 px-6 border transition-all duration-300 min-h-[44px] ${formData.attending
+              ? 'bg-white/10 border-white/40 text-white'
+              : 'border-white/10 text-white/40 hover:border-white/20'
+              } font-sans text-[10px] tracking-[0.2em] uppercase disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             Yes
           </button>
@@ -91,11 +90,10 @@ export function RSVPForm({
             type="button"
             onClick={() => onFieldChange('attending', false)}
             disabled={isSubmitting}
-            className={`flex-1 py-3 px-6 border transition-all duration-300 min-h-[44px] ${
-              !formData.attending
-                ? 'bg-white/10 border-white/40 text-white'
-                : 'border-white/10 text-white/40 hover:border-white/20'
-            } font-sans text-[10px] tracking-[0.2em] uppercase disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`flex-1 py-3 px-6 border transition-all duration-300 min-h-[44px] ${!formData.attending
+              ? 'bg-white/10 border-white/40 text-white'
+              : 'border-white/10 text-white/40 hover:border-white/20'
+              } font-sans text-[10px] tracking-[0.2em] uppercase disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             No
           </button>
@@ -112,11 +110,10 @@ export function RSVPForm({
             type="button"
             onClick={() => onFieldChange('side', 'bride')}
             disabled={isSubmitting}
-            className={`flex-1 py-2.5 md:py-3 border transition-all uppercase text-[9px] md:text-[10px] tracking-wider md:tracking-widest min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed ${
-              formData.side === 'bride'
-                ? 'bg-[#B76E79] border-[#B76E79] text-white'
-                : 'border-white/20 text-white/60 hover:border-[#B76E79]/50'
-            }`}
+            className={`flex-1 py-2.5 md:py-3 border transition-all uppercase text-[9px] md:text-[10px] tracking-wider md:tracking-widest min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed ${formData.side === 'bride'
+              ? 'bg-[#B76E79] border-[#B76E79] text-white'
+              : 'border-white/20 text-white/60 hover:border-[#B76E79]/50'
+              }`}
           >
             Team Bride
           </button>
@@ -124,11 +121,10 @@ export function RSVPForm({
             type="button"
             onClick={() => onFieldChange('side', 'groom')}
             disabled={isSubmitting}
-            className={`flex-1 py-2.5 md:py-3 border transition-all uppercase text-[9px] md:text-[10px] tracking-wider md:tracking-widest min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed ${
-              formData.side === 'groom'
-                ? 'bg-[#D4AF37] border-[#D4AF37] text-white'
-                : 'border-white/20 text-white/60 hover:border-[#D4AF37]/50'
-            }`}
+            className={`flex-1 py-2.5 md:py-3 border transition-all uppercase text-[9px] md:text-[10px] tracking-wider md:tracking-widest min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed ${formData.side === 'groom'
+              ? 'bg-[#D4AF37] border-[#D4AF37] text-white'
+              : 'border-white/20 text-white/60 hover:border-[#D4AF37]/50'
+              }`}
           >
             Team Groom
           </button>
@@ -197,6 +193,64 @@ export function RSVPForm({
           <p className="text-red-400 text-sm font-sans">{errors.submit}</p>
         </motion.div>
       )}
+
+      {/* Eco Consent Checkbox */}
+      <AnimatePresence>
+        {formData.attending && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="pt-2"
+          >
+            <label className="flex items-start gap-4 cursor-pointer group">
+              <div className="relative pt-1">
+                <input
+                  type="checkbox"
+                  checked={formData.ecoConsent}
+                  onChange={(e) => onFieldChange('ecoConsent', e.target.checked)}
+                  disabled={isSubmitting}
+                  className="peer sr-only"
+                />
+                <div className={`w-5 h-5 border transition-all duration-300 ${formData.ecoConsent
+                  ? 'bg-white border-white'
+                  : 'border-white/40 group-hover:border-white/80'
+                  }`}>
+                  {formData.ecoConsent && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="text-black flex items-center justify-center h-full"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="square" />
+                      </svg>
+                    </motion.div>
+                  )}
+                </div>
+                {errors.ecoConsent && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="absolute top-full left-0 mt-2 text-red-400 text-[10px] font-sans whitespace-nowrap"
+                  >
+                    {errors.ecoConsent}
+                  </motion.p>
+                )}
+              </div>
+              <div className="space-y-1">
+                <p className="font-serif italic text-white/90 text-sm leading-relaxed">
+                  "I agree to support Sansam’s wedding to generate minimum to zero non-biodegradable waste. Therefore I agree to carry my own water bottle and not carry any plastic discards."
+                </p>
+                <p className="font-sans text-[9px] tracking-wider text-white/40 uppercase">
+                  Required to Proceed
+                </p>
+              </div>
+            </label>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Submit button */}
       <motion.button

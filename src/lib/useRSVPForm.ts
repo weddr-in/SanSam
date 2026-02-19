@@ -12,6 +12,7 @@ interface RSVPFormData {
   attending_reception: boolean;
   attending_muhurtha: boolean;
   side?: 'bride' | 'groom';
+  ecoConsent: boolean;
 }
 
 interface UseRSVPFormReturn {
@@ -33,6 +34,7 @@ const initialFormData: RSVPFormData = {
   attending_reception: false,
   attending_muhurtha: false,
   side: undefined,
+  ecoConsent: false,
 };
 
 export function useRSVPForm(): UseRSVPFormReturn {
@@ -80,6 +82,11 @@ export function useRSVPForm(): UseRSVPFormReturn {
       if (!hasEvent) {
         newErrors.events = 'Please select at least one event';
       }
+
+      // Validate Eco Consent
+      if (!formData.ecoConsent) {
+        newErrors.ecoConsent = 'Please agree to the eco-friendly pledge to proceed.';
+      }
     }
 
     setErrors(newErrors);
@@ -94,6 +101,7 @@ export function useRSVPForm(): UseRSVPFormReturn {
     setIsSubmitting(true);
     try {
       const rawPhone = getRawPhone(formData.phone);
+      // Note: ecoConsent is not stored in DB as per schema, but is a gate for submission
       const dataToSubmit: Omit<RSVPData, 'submittedAt'> = {
         name: formData.name.trim(),
         phone: rawPhone,

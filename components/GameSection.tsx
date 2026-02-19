@@ -1092,25 +1092,53 @@ export const GameSection: React.FC = () => {
         }
     };
 
-    // Game timer
+    // Game timer - using Date.now() for more accuracy on mobile (handles throttling better)
     useEffect(() => {
         if (gameState !== 'playing') return;
+
+        let lastTick = Date.now();
+        let accumulatedTime = 0;
+
         const id = setInterval(() => {
-            setTimeRemaining(t => {
-                if (t <= 1) { clearInterval(id); setTimeout(() => setGameState('gameover'), 600); return 0; }
-                return t - 1;
-            });
-        }, 1000);
+            const now = Date.now();
+            const delta = now - lastTick;
+            lastTick = now;
+
+            // Accumulate time (handles mobile throttling)
+            accumulatedTime += delta;
+
+            // Only decrement when we've accumulated at least 1 second
+            if (accumulatedTime >= 1000) {
+                const secondsToDecrement = Math.floor(accumulatedTime / 1000);
+                accumulatedTime = accumulatedTime % 1000;
+
+                setTimeRemaining(t => {
+                    const newTime = Math.max(0, t - secondsToDecrement);
+                    if (newTime <= 0) {
+                        clearInterval(id);
+                        // Use requestAnimationFrame for smoother transition on mobile
+                        requestAnimationFrame(() => {
+                            setTimeout(() => setGameState('gameover'), 600);
+                        });
+                        return 0;
+                    }
+                    return newTime;
+                });
+            }
+        }, 100); // Check more frequently for better accuracy
+
         return () => clearInterval(id);
     }, [gameState]);
 
     const startGame = () => {
         if (!playerName.trim() || !playerSide) return;
-        setGameState('playing');
-        setScore(0); scoreRef.current = 0;
+        // Reset all game state including the saving ref
+        isSavingRef.current = false;
+        setScore(0);
+        scoreRef.current = 0;
         setStreak(0);
         setTimeRemaining(GAME_DURATION);
-        isSavingRef.current = false;
+        setGameState('playing');
     };
 
     const handleScore = useCallback(() => {
@@ -1130,21 +1158,65 @@ export const GameSection: React.FC = () => {
     const handleStreakUpdate = useCallback((s: number) => { setStreak(s); }, []);
 
     useEffect(() => {
-        if (gameState === 'gameover' && !isSavingRef.current) saveScore();
+        if (gameState === 'gameover') {
+            console.log('[Game] Game over state triggered, saving score...');
+            // Small delay to ensure state is settled, especially on mobile
+            const saveTimeout = setTimeout(() => {
+                saveScore();
+            }, 100);
+            return () => clearTimeout(saveTimeout);
+        }
     }, [gameState]);
 
     const saveScore = async () => {
-        if (isSavingRef.current) return;
+        if (isSavingRef.current) {
+            console.log('[SaveScore] Already saving, skipping...');
+            return;
+        }
+
+        // Double-check we have valid data before saving
+        if (!playerName.trim() || !playerSide) {
+            console.error('[SaveScore] Missing player data:', { playerName, playerSide });
+            return;
+        }
+
         isSavingRef.current = true;
-        const sanitizedName = DOMPurify.sanitize(playerName.trim(), { ALLOWED_TAGS: [] });
-        const title = playerSide === 'bride' ? 'Team San' : 'Team Sam';
-        const { error } = await supabase.from('leaderboard').insert([{ name: sanitizedName, score: scoreRef.current, title, side: playerSide || 'neutral', client_id: WEDDING_CLIENT_ID }]);
-        if (!error) {
+        console.log('[SaveScore] Starting to save score...', { name: playerName, score: scoreRef.current, side: playerSide });
+
+        try {
+            const sanitizedName = DOMPurify.sanitize(playerName.trim(), { ALLOWED_TAGS: [] });
+            const title = playerSide === 'bride' ? 'Team San' : 'Team Sam';
+
+            const payload = {
+                name: sanitizedName,
+                score: scoreRef.current,
+                title,
+                side: playerSide,
+                client_id: WEDDING_CLIENT_ID
+            };
+            console.log('[SaveScore] Inserting payload:', payload);
+
+            const { data, error } = await supabase
+                .from('leaderboard')
+                .insert([payload])
+                .select();
+
+            if (error) {
+                console.error("[SaveScore] Supabase error:", error);
+                throw error;
+            }
+
+            console.log('[SaveScore] Score saved successfully:', data);
             await fetchLeaderboard();
             await fetchTeamStats();
-        } else {
-            console.error("Error saving score to leaderboard:", error);
-            alert("Failed to save score. Please try again.");
+        } catch (err: any) {
+            console.error("[SaveScore] Error saving score:", err);
+            // Don't alert on mobile as it can be disruptive, just log it
+            if (window.innerWidth > 768) {
+                alert("Failed to save score. Please try again.");
+            }
+            // Reset the flag so user can try again
+            isSavingRef.current = false;
         }
     };
 
@@ -1157,16 +1229,22 @@ export const GameSection: React.FC = () => {
     };
 
     const resetGame = () => {
-        setGameState('intro'); setPlayerName(''); setPlayerSide(null);
-        setScore(0); scoreRef.current = 0; setStreak(0); setTimeRemaining(GAME_DURATION);
+        // Reset saving flag first to ensure clean state
         isSavingRef.current = false;
+        setGameState('intro');
+        setPlayerName('');
+        setPlayerSide(null);
+        setScore(0);
+        scoreRef.current = 0;
+        setStreak(0);
+        setTimeRemaining(GAME_DURATION);
     };
 
     const timerColor = timeRemaining <= 10 ? 'text-red-400' : timeRemaining <= 20 ? 'text-orange-400' : 'text-white';
     const timePulse = timeRemaining <= 10;
 
     return (
-        <section className="relative min-h-screen bg-[#050505] py-12 md:py-20 overflow-hidden">
+        <section className="relative min-h-screen md:h-screen bg-[#050505] overflow-hidden flex flex-col items-center justify-center py-12 md:py-0">
             {showConfetti && <Confetti />}
 
             <AnimatePresence>
@@ -1269,32 +1347,31 @@ export const GameSection: React.FC = () => {
                                 )}
                             </div>
 
-                            {/* Top players */}
-                            <div className="flex-1 space-y-2 overflow-y-auto">
+                            {/* Top players - Limited to Top 3 for compact height */}
+                            <div className="flex-1 space-y-2 overflow-hidden">
                                 {leaderboard.length === 0 ? (
-                                    <div className="text-center text-white/30 py-6"><p className="font-serif italic text-sm">Be the first to play!</p></div>
+                                    <div className="text-center text-white/30 py-4"><p className="font-serif italic text-sm">Be the first to play!</p></div>
                                 ) : (
-                                    leaderboard.map((p, i) => (
-                                        <div key={p.id || `lb-${i}`} className="flex items-center justify-between p-3 bg-black/20 border border-white/5 hover:border-white/15 transition-all">
+                                    leaderboard.slice(0, 3).map((p, i) => (
+                                        <div key={p.id || `lb-${i}`} className="flex items-center justify-between p-2.5 bg-black/20 border border-white/5 hover:border-white/15 transition-all rounded-sm">
                                             <div className="flex items-center gap-3">
                                                 <span className={`font-mono text-sm font-bold w-5 text-center ${i === 0 ? 'text-[#FFD700]' : 'text-white/30'}`}>{i === 0 ? '🏆' : `${i + 1}`}</span>
                                                 <div>
                                                     <span className="text-white font-sans text-sm block">{p.name}</span>
-                                                    <span className={`text-[9px] uppercase tracking-wider ${p.side === 'bride' ? 'text-pink-400' : 'text-blue-400'}`}>
+                                                    <span className={`text-[8px] uppercase tracking-wider ${p.side === 'bride' ? 'text-pink-400' : 'text-blue-400'}`}>
                                                         {p.side === 'bride' ? '🌸 Team San' : '💙 Team Sam'}
                                                     </span>
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <span className="text-[#FFD700] font-mono font-bold text-lg block">{p.score}</span>
-                                                <span className="text-white/25 text-[9px]">baskets</span>
+                                                <span className="text-[#FFD700] font-mono font-bold text-base block">{p.score}</span>
                                             </div>
                                         </div>
                                     ))
                                 )}
                             </div>
                             <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={loadAllScorers} disabled={isLoadingAllLeaderboard}
-                                className="w-full mt-4 py-3 border border-white/10 text-white/40 font-sans text-[9px] tracking-[0.2em] uppercase hover:bg-white/5 hover:text-white/70 hover:border-white/20 transition-all flex items-center justify-center gap-2 disabled:opacity-30">
+                                className="w-full mt-3 py-2.5 border border-white/10 text-white/40 font-sans text-[9px] tracking-[0.2em] uppercase hover:bg-white/5 hover:text-white/70 hover:border-white/20 transition-all flex items-center justify-center gap-2 disabled:opacity-30 rounded-sm">
                                 {isLoadingAllLeaderboard ? 'Loading...' : 'View All Players'}
                             </motion.button>
                         </div>
