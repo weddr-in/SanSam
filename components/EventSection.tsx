@@ -435,62 +435,74 @@ export const EventSection: React.FC<EventSectionProps> = ({ event, index }) => {
                         </div>
                     </div>
 
-                    {/* Attire / Dress Code - Redesigned Mobile */}
+                    {/* Attire / Dress Code */}
                     {event.outfit && (
-                        <div className="mt-6 pt-6 border-t border-white/10">
-                            <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 mb-2 relative overflow-hidden">
-                                {/* Subtle inner glow */}
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-50" />
-
-                                <div className="flex items-start gap-3 relative z-10">
-                                    <div className="mt-0.5">
-                                        <Shirt size={16} className="text-white/40" />
+                        <div className="mb-6 pb-6 border-b border-white/10">
+                            <div className="flex items-start gap-3">
+                                <div className="mt-1">
+                                    <Shirt size={16} className="text-white/40" />
+                                </div>
+                                <div className="flex-1">
+                                    <span className="block font-sans text-[10px] tracking-widest uppercase text-white/40 mb-2">
+                                        Dress Code
+                                    </span>
+                                    <div className="font-display text-2xl text-white mb-2 leading-tight">
+                                        {event.outfit.type}
                                     </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <span className="font-sans text-[10px] tracking-widest uppercase text-white/40">
-                                                Attire & Aesthetics
-                                            </span>
-                                        </div>
-
-                                        <div className="font-display text-2xl text-white mb-2 leading-tight">
-                                            {event.outfit.type}
-                                        </div>
-
-                                        {/* Color Swatches inline */}
-                                        {event.palette && (
-                                            <div className="flex flex-wrap gap-2 my-3">
-                                                {event.palette.map((color, i) => (
-                                                    <div
-                                                        key={i}
-                                                        className="w-5 h-5 rounded-full border border-white/20 shadow-sm"
-                                                        style={{ backgroundColor: color }}
-                                                    />
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        <div className="space-y-3 mt-4">
-                                            <p className="font-sans text-sm text-white/80 leading-relaxed">
-                                                <span className="text-white/40 font-mono text-[9px] uppercase tracking-wider block mb-1">Color Scheme</span>
-                                                {event.outfit.colors}
+                                    <div className="space-y-2 mt-3">
+                                        <p className="font-sans text-sm text-white/80">
+                                            <span className="text-white/40 font-mono text-[9px] uppercase tracking-wider mr-2">Wear</span>
+                                            {event.outfit.colors}
+                                        </p>
+                                        {event.outfit.avoid && (
+                                            <p className="font-sans text-sm text-white/60">
+                                                <span className="text-red-400/50 font-mono text-[9px] uppercase tracking-wider mr-2">Avoid</span>
+                                                {event.outfit.avoid}
                                             </p>
-
-                                            {event.outfit.avoid && (
-                                                <div className="bg-red-500/5 rounded-lg p-3 border border-red-500/10 mt-2">
-                                                    <p className="font-sans text-sm text-white/60 flex items-start gap-2">
-                                                        <X size={14} className="text-red-400/50 flex-shrink-0 mt-0.5" />
-                                                        <span>
-                                                            <span className="text-red-400/50 font-mono text-[9px] uppercase tracking-wider block mb-0.5">Kindly Avoid</span>
-                                                            {event.outfit.avoid}
-                                                        </span>
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    )}
+
+                    {/* Color Palette - Expandable */}
+                    {event.palette && (
+                        <div className="pt-6 border-t border-white/10">
+                            <button
+                                onClick={() => setExpandedPalette(!expandedPalette)}
+                                className="w-full flex items-center justify-between cursor-pointer group"
+                            >
+                                <span className="font-sans text-[10px] tracking-widest uppercase text-white/40 group-hover:text-white/60 transition-colors">
+                                    Color Palette
+                                </span>
+                                <div className="flex gap-2">
+                                    {event.palette.slice(0, 4).map((color, i) => (
+                                        <motion.div
+                                            key={i}
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            className="w-8 h-8 rounded-full border-2 border-white/20 shadow-lg relative"
+                                            style={{ backgroundColor: color }}
+                                        >
+                                            <AnimatePresence>
+                                                {expandedPalette && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        exit={{ opacity: 0, y: 10 }}
+                                                        className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-md border border-white/20 rounded-lg px-2 py-1 whitespace-nowrap"
+                                                    >
+                                                        <span className="font-mono text-[9px] text-white">
+                                                            {color}
+                                                        </span>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </button>
                         </div>
                     )}
                 </motion.div>
@@ -716,77 +728,29 @@ export const EventSection: React.FC<EventSectionProps> = ({ event, index }) => {
                                         </a>
                                     </div>
 
-                                    {/* Attire Section - Premium Desktop Redesign */}
+                                    {/* Attire Section */}
                                     {event.outfit && (
-                                        <div className="flex flex-col gap-5 group/attire md:col-span-2 pt-8 mt-4 border-t border-white/5 relative">
-                                            {/* Accent Background Glow */}
-                                            <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-gradient-to-r from-white/5 to-transparent rounded-full blur-3xl -translate-y-1/2 pointer-events-none opacity-30" />
-
-                                            <div className="flex items-center gap-4 text-white/40 mb-2">
-                                                <div className="p-2 rounded-full bg-white/5 border border-white/10 text-white/50">
-                                                    <Shirt size={16} />
-                                                </div>
-                                                <span className="font-sans text-[11px] tracking-[0.3em] uppercase opacity-80">Attire & Aesthetics</span>
+                                        <div className="flex flex-col gap-3 group/attire md:col-span-2 pt-6 border-t border-white/5">
+                                            <div className="flex items-center gap-3 text-white/40 mb-1">
+                                                <Shirt size={14} className="text-white/30" />
+                                                <span className="font-sans text-[10px] tracking-[0.25em] uppercase opacity-70">Dress Code</span>
                                             </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-start relative z-10">
-                                                {/* Left Column: Theme & Details */}
-                                                <div className="md:col-span-5">
-                                                    <span className="font-display text-4xl lg:text-5xl text-white leading-tight block mb-3">{event.outfit.type}</span>
-                                                    <p className="font-serif italic text-lg lg:text-xl text-white/50 leading-relaxed">
-                                                        {event.outfit.description}
-                                                    </p>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <div>
+                                                    <span className="font-display text-4xl text-white leading-[1.1] group-hover/attire:text-white/90 transition-colors block mb-2">{event.outfit.type}</span>
+                                                    <p className="font-serif italic text-lg text-white/50">{event.outfit.description}</p>
                                                 </div>
-
-                                                {/* Right Column: Colors & Rules */}
-                                                <div className="md:col-span-7 flex flex-col gap-6 bg-white/[0.02] border border-white/5 rounded-2xl p-6 lg:p-8 backdrop-blur-sm shadow-[0_4px_30px_rgba(0,0,0,0.1)] hover:bg-white/[0.04] transition-all duration-300">
-
-                                                    {/* Color Swatches */}
-                                                    {event.palette && (
-                                                        <div className="mb-2">
-                                                            <span className="block font-sans text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4">Recommended Palette</span>
-                                                            <div className="flex flex-wrap gap-3">
-                                                                {event.palette.map((color, i) => (
-                                                                    <div
-                                                                        key={i}
-                                                                        className="group/color relative"
-                                                                    >
-                                                                        <div
-                                                                            className="w-10 h-10 rounded-full border border-white/20 shadow-md transform transition-transform duration-300 hover:scale-110 cursor-help"
-                                                                            style={{ backgroundColor: color }}
-                                                                        />
-                                                                        {/* Tooltip on hover */}
-                                                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-md border border-white/10 rounded-lg px-3 py-1.5 opacity-0 group-hover/color:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                                                                            <span className="font-mono text-[10px] text-white">{color}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
+                                                <div className="flex flex-col gap-4 justify-center">
+                                                    <div>
+                                                        <span className="block font-mono text-[9px] uppercase tracking-widest text-white/30 mb-1">Color Palette</span>
+                                                        <p className="font-sans text-sm text-white/80">{event.outfit.colors}</p>
+                                                    </div>
+                                                    {event.outfit.avoid && (
+                                                        <div>
+                                                            <span className="block font-mono text-[9px] uppercase tracking-widest text-red-400/50 mb-1">Please Avoid</span>
+                                                            <p className="font-sans text-sm text-white/60">{event.outfit.avoid}</p>
                                                         </div>
                                                     )}
-
-                                                    {/* Rules/Descriptions */}
-                                                    <div className="flex flex-col gap-5">
-                                                        <div>
-                                                            <p className="font-sans text-sm lg:text-base text-white/80 leading-relaxed">
-                                                                <span className="text-white/40 font-mono text-[10px] uppercase tracking-widest block mb-1">Color Scheme</span>
-                                                                {event.outfit.colors}
-                                                            </p>
-                                                        </div>
-
-                                                        {event.outfit.avoid && (
-                                                            <div className="bg-red-500/[0.03] border border-red-500/10 rounded-xl p-4 flex gap-3 items-start group-hover/attire:border-red-500/20 transition-colors">
-                                                                <div className="p-1 rounded bg-red-500/10 text-red-400 mt-0.5">
-                                                                    <X size={14} />
-                                                                </div>
-                                                                <div>
-                                                                    <span className="block font-mono text-[10px] uppercase tracking-widest text-red-400/60 mb-1">Kindly Avoid</span>
-                                                                    <p className="font-sans text-sm text-white/60">{event.outfit.avoid}</p>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-
                                                 </div>
                                             </div>
                                         </div>
@@ -1204,8 +1168,8 @@ export const EventSection: React.FC<EventSectionProps> = ({ event, index }) => {
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.95 }}
                                             className={`relative overflow-hidden rounded-lg transition-all duration-300 ${i === desktopGalleryIndex
-                                                ? 'w-20 h-20 ring-2 ring-white shadow-[0_0_20px_rgba(255,255,255,0.3)]'
-                                                : 'w-16 h-16 opacity-50 hover:opacity-80'
+                                                    ? 'w-20 h-20 ring-2 ring-white shadow-[0_0_20px_rgba(255,255,255,0.3)]'
+                                                    : 'w-16 h-16 opacity-50 hover:opacity-80'
                                                 }`}
                                             aria-label={`Go to image ${i + 1}`}
                                         >
