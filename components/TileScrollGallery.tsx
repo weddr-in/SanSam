@@ -134,7 +134,7 @@ export const TileScrollGallery: React.FC = () => {
                                 {/* Duplicate the set for seamless infinite loop */}
                                 {[...rowImages, ...rowImages].map((src, imgIdx) => {
                                     // Compute the global index for lightbox
-                                    const globalIdx = (rowIdx * Math.ceil(IMAGES.length / 4) + (imgIdx % rowImages.length)) % IMAGES.length;
+                                    const globalIdx = (rowIdx * Math.ceil(IMAGES.length / 5) + (imgIdx % rowImages.length)) % IMAGES.length;
                                     return (
                                         <div
                                             key={imgIdx}
