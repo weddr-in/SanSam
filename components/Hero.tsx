@@ -17,8 +17,20 @@ export const Hero: React.FC<HeroProps> = ({ isMuted, toggleMute, onVideoReady })
   const videoLoadedRef = useRef(false);
   const fallbackImageRef = useRef<HTMLImageElement>(null);
 
+  // Synchronously compute isMobile for first render to avoid preloader flicker
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    // the window event is enough for resize since initial state covers mount
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Vimeo Configuration - with quality=auto for adaptive streaming
-  const VIDEO_ID = 1165111013;
+  const VIDEO_ID = isMobile ? 1168773407 : 1165111013;
   const VIDEO_SRC = `https://player.vimeo.com/video/${VIDEO_ID}?h=b39cd6900f&badge=0&autopause=0&player_id=hero_video&app_id=58479&autoplay=1&loop=1&muted=1&controls=0&playsinline=1&quality=auto`;
 
   // Optimized local fallback image - loads instantly, no network dependency
@@ -91,10 +103,10 @@ export const Hero: React.FC<HeroProps> = ({ isMuted, toggleMute, onVideoReady })
 
     return () => {
       clearTimeout(fallbackTimer);
-      player.unload();
+      if (playerRef.current) playerRef.current.unload();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isMobile]);
 
   // Sync Mute State with Vimeo Player
   useEffect(() => {
@@ -110,7 +122,7 @@ export const Hero: React.FC<HeroProps> = ({ isMuted, toggleMute, onVideoReady })
   }, [isMuted]);
 
   return (
-    <section id="film" className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-black">
+    <section id="film" className="relative w-full h-[100dvh] flex items-center justify-center overflow-hidden bg-black">
 
       {/* Hidden preload image - loads in background for instant display if video fails */}
       <img
@@ -137,21 +149,20 @@ export const Hero: React.FC<HeroProps> = ({ isMuted, toggleMute, onVideoReady })
         {/* Vimeo Video Layer - Always loads first */}
         <div className={`relative w-full h-full overflow-hidden ${videoFailed ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`}>
           <iframe
+            key={isMobile ? 'mobile' : 'desktop'}
             ref={iframeRef}
-            src={VIDEO_SRC}
+            src={VIDEO_SRC + '&background=1'}
             frameBorder="0"
             allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; gyroscope; accelerometer"
             style={{
               position: 'absolute',
               top: '50%',
               left: '50%',
-              width: '100vw',
-              height: '100vh',
+              width: 'max(100vw, 177.77vh)',
+              height: 'max(100vh, 56.25vw)',
               transform: 'translate(-50%, -50%)',
               pointerEvents: 'none',
               objectFit: 'cover',
-              minWidth: '177.77vh',
-              minHeight: '56.25vw'
             }}
             title="Sanjana & Samartha Engagement Video"
           />

@@ -142,9 +142,6 @@ export const Home: React.FC = () => {
             {/* Background Music - Disabled as video now has its own audio */}
             {/* <BackgroundMusic isMuted={isMuted} /> */}
 
-
-
-            // Inside Home component return:
             {/* Events Section */}
             <section id="itinerary" className="relative z-20">
                 {EVENTS.map((event, index) => (
