@@ -446,21 +446,17 @@ export const EventSection: React.FC<EventSectionProps> = ({ event, index }) => {
                                     <span className="block font-sans text-[10px] tracking-widest uppercase text-white/40 mb-2">
                                         Dress Code
                                     </span>
-                                    <div className="font-display text-2xl text-white mb-2 leading-tight">
+                                    <div className="font-display text-3xl text-white mb-2 leading-tight">
                                         {event.outfit.type}
                                     </div>
-                                    <div className="space-y-2 mt-3">
-                                        <p className="font-sans text-sm text-white/80">
-                                            <span className="text-white/40 font-mono text-[9px] uppercase tracking-wider mr-2">Wear</span>
-                                            {event.outfit.colors}
-                                        </p>
+                                    <p className="font-sans text-sm text-white/60 leading-relaxed pr-4">
+                                        {event.outfit.description} {event.outfit.colors}
                                         {event.outfit.avoid && (
-                                            <p className="font-sans text-sm text-white/60">
-                                                <span className="text-red-400/50 font-mono text-[9px] uppercase tracking-wider mr-2">Avoid</span>
-                                                {event.outfit.avoid}
-                                            </p>
+                                            <span className="text-red-400/50 italic ml-2">
+                                                (Avoid {event.outfit.avoid.toLowerCase().replace('please avoid ', '')})
+                                            </span>
                                         )}
-                                    </div>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -735,23 +731,18 @@ export const EventSection: React.FC<EventSectionProps> = ({ event, index }) => {
                                                 <Shirt size={14} className="text-white/30" />
                                                 <span className="font-sans text-[10px] tracking-[0.25em] uppercase opacity-70">Dress Code</span>
                                             </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                <div>
-                                                    <span className="font-display text-4xl text-white leading-[1.1] group-hover/attire:text-white/90 transition-colors block mb-2">{event.outfit.type}</span>
-                                                    <p className="font-serif italic text-lg text-white/50">{event.outfit.description}</p>
-                                                </div>
-                                                <div className="flex flex-col gap-4 justify-center">
-                                                    <div>
-                                                        <span className="block font-mono text-[9px] uppercase tracking-widest text-white/30 mb-1">Color Palette</span>
-                                                        <p className="font-sans text-sm text-white/80">{event.outfit.colors}</p>
-                                                    </div>
+                                            <div className="flex flex-col">
+                                                <span className="font-display text-4xl md:text-5xl text-white leading-[1.1] group-hover/attire:text-white/90 transition-colors">
+                                                    {event.outfit.type}
+                                                </span>
+                                                <p className="font-sans text-sm text-white/60 mt-3 max-w-2xl leading-relaxed">
+                                                    {event.outfit.description} {event.outfit.colors}
                                                     {event.outfit.avoid && (
-                                                        <div>
-                                                            <span className="block font-mono text-[9px] uppercase tracking-widest text-red-400/50 mb-1">Please Avoid</span>
-                                                            <p className="font-sans text-sm text-white/60">{event.outfit.avoid}</p>
-                                                        </div>
+                                                        <span className="text-red-400/60 italic ml-2">
+                                                            (Avoid {event.outfit.avoid.toLowerCase().replace('please avoid ', '')})
+                                                        </span>
                                                     )}
-                                                </div>
+                                                </p>
                                             </div>
                                         </div>
                                     )}
@@ -1168,8 +1159,8 @@ export const EventSection: React.FC<EventSectionProps> = ({ event, index }) => {
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.95 }}
                                             className={`relative overflow-hidden rounded-lg transition-all duration-300 ${i === desktopGalleryIndex
-                                                    ? 'w-20 h-20 ring-2 ring-white shadow-[0_0_20px_rgba(255,255,255,0.3)]'
-                                                    : 'w-16 h-16 opacity-50 hover:opacity-80'
+                                                ? 'w-20 h-20 ring-2 ring-white shadow-[0_0_20px_rgba(255,255,255,0.3)]'
+                                                : 'w-16 h-16 opacity-50 hover:opacity-80'
                                                 }`}
                                             aria-label={`Go to image ${i + 1}`}
                                         >
