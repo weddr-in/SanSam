@@ -24,7 +24,7 @@ const WEDDING_KNOWLEDGE = {
       time: "5:30 PM Onwards",
       venue: "Kalyani Courtyard - Reception Arena",
       venueAddress: "Kalyani Courtyard, Bangalore, Karnataka",
-      mapsLink: "https://share.google/xz0pHMIfIkeU1Y1TL",
+      mapsLink: "https://maps.app.goo.gl/NX1AvDJwZVrC7zwy7",
       theme: "Evening Elegance",
       colorHex: "#D4A5A5",
       colorPalette: ["Dusty Rose (#D4A5A5)", "Champagne (#F5E6D3)", "Rose Gold (#B76E79)", "Soft Mauve (#C8A2C8)"],
@@ -39,7 +39,7 @@ const WEDDING_KNOWLEDGE = {
       lagnaMuhurta: "9:10 AM - 9:30 AM",
       venue: "Kalyani Courtyard - Wedding House",
       venueAddress: "Kalyani Courtyard, Bangalore, Karnataka",
-      mapsLink: "https://share.google/xz0pHMIfIkeU1Y1TL",
+      mapsLink: "https://maps.app.goo.gl/NX1AvDJwZVrC7zwy7",
       theme: "Sacred Dawn",
       colorHex: "#FAF3E0",
       colorPalette: ["Ivory (#FAF3E0)", "Soft Saffron (#FFE4B5)", "Pale Lavender (#E6E6FA)", "Sacred Gold (#D4AF37)", "Lotus Pink (#FFB6C1)"],
@@ -266,7 +266,7 @@ Sacred Dawn: Ivory, Soft Saffron, Pale Lavender, Sacred Gold, Lotus Pink
 Lagna Muhurta: 9:10 AM - 9:30 AM`,
 
   directions: `Kalyani Courtyard
-https://share.google/xz0pHMIfIkeU1Y1TL
+https://maps.app.goo.gl/NX1AvDJwZVrC7zwy7
 
 Both Reception and Wedding at the same venue (different areas).
 Ola/Uber available. Located in Bangalore.`,

@@ -26,7 +26,7 @@ const EVENTS: EventDetails[] = [
         date: '24.03.26',
         time: '5:30 PM Onwards',
         location: 'Kalyani Courtyard - Reception Arena',
-        mapsLink: 'https://share.google/xz0pHMIfIkeU1Y1TL',
+        mapsLink: 'https://maps.app.goo.gl/NX1AvDJwZVrC7zwy7',
         theme: 'evening',
         colorHex: '#B76E79',
         palette: ['#D4A5A5', '#F5E6D3', '#B76E79', '#C8A2C8'], // Dusty Rose, Champagne, Rose Gold, Soft Mauve
@@ -39,7 +39,7 @@ const EVENTS: EventDetails[] = [
         date: '25.03.26',
         time: '9:00 AM Onwards',
         location: 'Kalyani Courtyard - Wedding House',
-        mapsLink: 'https://share.google/xz0pHMIfIkeU1Y1TL',
+        mapsLink: 'https://maps.app.goo.gl/NX1AvDJwZVrC7zwy7',
         theme: 'sacred',
         colorHex: '#D4AF37',
         palette: ['#FAF3E0', '#FFE4B5', '#E6E6FA', '#D4AF37', '#FFB6C1'], // Ivory, Soft Saffron, Pale Lavender, Sacred Gold, Lotus Pink
