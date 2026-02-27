@@ -29,7 +29,7 @@ const EVENTS: EventDetails[] = [
         mapsLink: 'https://maps.app.goo.gl/NX1AvDJwZVrC7zwy7',
         theme: 'evening',
         colorHex: '#B76E79',
-        palette: ['#D4A5A5', '#F5E6D3', '#B76E79', '#C8A2C8'], // Dusty Rose, Champagne, Rose Gold, Soft Mauve
+        palette: ['#000000', '#000080', '#013220'], // Black, Navy Blue, Dark Green
         icon: <Moon size={24} strokeWidth={1} />,
         outfit: {
             type: "Western Wear",
@@ -48,7 +48,7 @@ const EVENTS: EventDetails[] = [
         mapsLink: 'https://maps.app.goo.gl/NX1AvDJwZVrC7zwy7',
         theme: 'sacred',
         colorHex: '#D4AF37',
-        palette: ['#FAF3E0', '#FFE4B5', '#E6E6FA', '#D4AF37', '#FFB6C1'], // Ivory, Soft Saffron, Pale Lavender, Sacred Gold, Lotus Pink
+        palette: ['#FFB6C1', '#FF0000', '#800000', '#800080', '#E6E6FA', '#FFC0CB', '#FFFF00'], // Pastels, Red, Maroon, Purple, Lavender, Pink, Yellow
         icon: <Sun size={24} strokeWidth={1} />,
         outfit: {
             type: "Ethnic Wear",
