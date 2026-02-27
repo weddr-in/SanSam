@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Music, Plus, Check, Disc, Loader2, Trophy, Droplets, Sparkles, Zap, Heart, Activity } from 'lucide-react';
+import { Search, Music, Plus, Check, Disc, Loader2, Trophy, Droplets, Sparkles, Zap, Heart, Activity, Flame } from 'lucide-react';
 import { supabase } from '../src/lib/supabase';
 import { searchTracks, getClientAccessToken } from '../lib/spotify';
 
