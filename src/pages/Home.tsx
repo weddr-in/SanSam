@@ -30,7 +30,13 @@ const EVENTS: EventDetails[] = [
         theme: 'evening',
         colorHex: '#B76E79',
         palette: ['#D4A5A5', '#F5E6D3', '#B76E79', '#C8A2C8'], // Dusty Rose, Champagne, Rose Gold, Soft Mauve
-        icon: <Moon size={24} strokeWidth={1} />
+        icon: <Moon size={24} strokeWidth={1} />,
+        outfit: {
+            type: "Western Wear",
+            description: "Gowns, suits, tuxedos etc.",
+            colors: "Dark colors like black / navy blue / dark green.",
+            avoid: "Please avoid dark brown."
+        }
     },
     {
         id: 'wedding',
@@ -43,7 +49,13 @@ const EVENTS: EventDetails[] = [
         theme: 'sacred',
         colorHex: '#D4AF37',
         palette: ['#FAF3E0', '#FFE4B5', '#E6E6FA', '#D4AF37', '#FFB6C1'], // Ivory, Soft Saffron, Pale Lavender, Sacred Gold, Lotus Pink
-        icon: <Sun size={24} strokeWidth={1} />
+        icon: <Sun size={24} strokeWidth={1} />,
+        outfit: {
+            type: "Ethnic Wear",
+            description: "Traditional Indian ethnic wear.",
+            colors: "Pastel colors, red, maroon, purple, lavender, pink, yellow.",
+            avoid: "Please avoid whites and off-whites."
+        }
     }
 ];
 

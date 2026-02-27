@@ -12,6 +12,12 @@ export interface EventDetails {
   palette?: string[];
   mapsLink?: string;
   icon?: React.ReactNode;
+  outfit?: {
+    type: string;
+    description: string;
+    colors: string;
+    avoid?: string;
+  };
 }
 
 export interface GuestbookEntry {

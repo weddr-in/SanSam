@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventDetails } from '../types';
-import { MapPin, Clock, Calendar, Palette, ArrowRight, ExternalLink, X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
+import { MapPin, Clock, Calendar, Palette, ArrowRight, ExternalLink, X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Shirt } from 'lucide-react';
 import { GrowingVine } from './GrowingVine';
 
 interface EventSectionProps {
@@ -435,6 +435,37 @@ export const EventSection: React.FC<EventSectionProps> = ({ event, index }) => {
                         </div>
                     </div>
 
+                    {/* Attire / Dress Code */}
+                    {event.outfit && (
+                        <div className="mb-6 pb-6 border-b border-white/10">
+                            <div className="flex items-start gap-3">
+                                <div className="mt-1">
+                                    <Shirt size={16} className="text-white/40" />
+                                </div>
+                                <div className="flex-1">
+                                    <span className="block font-sans text-[10px] tracking-widest uppercase text-white/40 mb-2">
+                                        Dress Code
+                                    </span>
+                                    <div className="font-display text-2xl text-white mb-2 leading-tight">
+                                        {event.outfit.type}
+                                    </div>
+                                    <div className="space-y-2 mt-3">
+                                        <p className="font-sans text-sm text-white/80">
+                                            <span className="text-white/40 font-mono text-[9px] uppercase tracking-wider mr-2">Wear</span>
+                                            {event.outfit.colors}
+                                        </p>
+                                        {event.outfit.avoid && (
+                                            <p className="font-sans text-sm text-white/60">
+                                                <span className="text-red-400/50 font-mono text-[9px] uppercase tracking-wider mr-2">Avoid</span>
+                                                {event.outfit.avoid}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Color Palette - Expandable */}
                     {event.palette && (
                         <div className="pt-6 border-t border-white/10">
@@ -696,6 +727,34 @@ export const EventSection: React.FC<EventSectionProps> = ({ event, index }) => {
                                             View Map <ArrowRight size={10} />
                                         </a>
                                     </div>
+
+                                    {/* Attire Section */}
+                                    {event.outfit && (
+                                        <div className="flex flex-col gap-3 group/attire md:col-span-2 pt-6 border-t border-white/5">
+                                            <div className="flex items-center gap-3 text-white/40 mb-1">
+                                                <Shirt size={14} className="text-white/30" />
+                                                <span className="font-sans text-[10px] tracking-[0.25em] uppercase opacity-70">Dress Code</span>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <div>
+                                                    <span className="font-display text-4xl text-white leading-[1.1] group-hover/attire:text-white/90 transition-colors block mb-2">{event.outfit.type}</span>
+                                                    <p className="font-serif italic text-lg text-white/50">{event.outfit.description}</p>
+                                                </div>
+                                                <div className="flex flex-col gap-4 justify-center">
+                                                    <div>
+                                                        <span className="block font-mono text-[9px] uppercase tracking-widest text-white/30 mb-1">Color Palette</span>
+                                                        <p className="font-sans text-sm text-white/80">{event.outfit.colors}</p>
+                                                    </div>
+                                                    {event.outfit.avoid && (
+                                                        <div>
+                                                            <span className="block font-mono text-[9px] uppercase tracking-widest text-red-400/50 mb-1">Please Avoid</span>
+                                                            <p className="font-sans text-sm text-white/60">{event.outfit.avoid}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Action Buttons - Premium Minimalist */}
@@ -1108,11 +1167,10 @@ export const EventSection: React.FC<EventSectionProps> = ({ event, index }) => {
                                             onClick={(e) => { e.stopPropagation(); setDesktopGalleryIndex(i); setImageZoom(1); }}
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.95 }}
-                                            className={`relative overflow-hidden rounded-lg transition-all duration-300 ${
-                                                i === desktopGalleryIndex
+                                            className={`relative overflow-hidden rounded-lg transition-all duration-300 ${i === desktopGalleryIndex
                                                     ? 'w-20 h-20 ring-2 ring-white shadow-[0_0_20px_rgba(255,255,255,0.3)]'
                                                     : 'w-16 h-16 opacity-50 hover:opacity-80'
-                                            }`}
+                                                }`}
                                             aria-label={`Go to image ${i + 1}`}
                                         >
                                             <img

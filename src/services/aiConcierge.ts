@@ -28,7 +28,7 @@ const WEDDING_KNOWLEDGE = {
       theme: "Evening Elegance",
       colorHex: "#D4A5A5",
       colorPalette: ["Dusty Rose (#D4A5A5)", "Champagne (#F5E6D3)", "Rose Gold (#B76E79)", "Soft Mauve (#C8A2C8)"],
-      dressCode: "Elegant evening wear in dusty rose, champagne, rose gold, and soft mauve tones. Women: Cocktail gowns, sarees, or lehengas in the event's soft palette. Men: Suits, tuxedos, or formal sherwanis in complementary colors like beige, taupe, or soft pink.",
+      dressCode: "Western wear (preferably gowns, suits, tuxedos etc). Color: Dark colors like black, navy blue, or dark green. Please avoid dark brown.",
       vibe: "Elegant, warm evening celebration with dinner and entertainment",
     },
     {
@@ -43,7 +43,7 @@ const WEDDING_KNOWLEDGE = {
       theme: "Sacred Dawn",
       colorHex: "#FAF3E0",
       colorPalette: ["Ivory (#FAF3E0)", "Soft Saffron (#FFE4B5)", "Pale Lavender (#E6E6FA)", "Sacred Gold (#D4AF37)", "Lotus Pink (#FFB6C1)"],
-      dressCode: "Traditional wedding attire in light, spiritual tones. Women: Sarees, silk sarees, or traditional lehengas in ivory, saffron, lavender, gold, or lotus pink. Men: Traditional dhoti with angavastram, or sherwanis in cream, gold, or ivory. This is a sacred ceremony, so traditional attire is preferred.",
+      dressCode: "Ethnic wear. Colors: pastel colors, red, maroon, purple, lavender, pink, yellow. Please avoid whites and off whites.",
       vibe: "Sacred, spiritual morning ceremony with traditional rituals and blessings",
     },
   ],
@@ -271,15 +271,14 @@ https://maps.app.goo.gl/NX1AvDJwZVrC7zwy7
 Both Reception and Wedding at the same venue (different areas).
 Ola/Uber available. Located in Bangalore.`,
 
-  colorThemes: `Reception: Dusty Rose, Champagne, Rose Gold, Soft Mauve
-
-Wedding: Ivory, Soft Saffron, Pale Lavender, Sacred Gold, Lotus Pink
+  colorThemes: `Reception: Dark colors like black, navy blue, dark green.
+Wedding: Pastel colors, red, maroon, purple, lavender, pink, yellow.
 
 Upload a photo for outfit matching.`,
 
-  dressGuide: `Reception: Evening elegance - dusty rose, champagne, rose gold, mauve
+  dressGuide: `Reception: Western wear (gowns, suits). Dark colors like black, navy blue, dark green. Avoid dark brown.
 
-Wedding: Traditional spiritual tones - ivory, saffron, lavender, gold, lotus pink
+Wedding: Ethnic wear. Pastel colors, red, maroon, purple, lavender, pink, yellow. Avoid whites/off-whites.
 
 Tell me if you're looking for men's or women's attire for specific recommendations!`,
 };
