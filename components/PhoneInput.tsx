@@ -29,10 +29,9 @@ export function PhoneInput({ value, onChange, error, disabled }: PhoneInputProps
           value={value}
           onChange={handleChange}
           disabled={disabled}
-          placeholder="98765 43210"
-          className={`w-full bg-transparent pl-12 pr-4 py-3 border-b ${
-            error ? 'border-red-500/50' : 'border-white/10'
-          } text-white font-sans transition-colors duration-300 focus:outline-none focus:border-white/40 disabled:opacity-50 disabled:cursor-not-allowed`}
+          placeholder="Enter mobile number"
+          className={`w-full bg-transparent pl-12 pr-4 py-3 border-b ${error ? 'border-red-500/50' : 'border-white/10'
+            } text-white font-sans transition-colors duration-300 focus:outline-none focus:border-white/40 disabled:opacity-50 disabled:cursor-not-allowed`}
           maxLength={11} // 10 digits + 1 space
         />
       </div>

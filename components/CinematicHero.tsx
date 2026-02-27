@@ -54,11 +54,13 @@ export function CinematicHero({ isMuted, toggleMute, onVideoReady }: CinematicHe
     useEffect(() => {
         if (!canvasRef.current || !containerRef.current) return;
 
+        const dpr = Math.min(window.devicePixelRatio, 2);
+
         const renderer = new Renderer({
             canvas: canvasRef.current,
             width: window.innerWidth,
             height: window.innerHeight,
-            dpr: Math.min(window.devicePixelRatio, 2),
+            dpr: dpr,
             alpha: true,
             antialias: true,
         });
@@ -189,7 +191,7 @@ export function CinematicHero({ isMuted, toggleMute, onVideoReady }: CinematicHe
                             tMap: { value: texture },
                             uDarkness: { value: 0.3 },
                             uMouse: { value: [-1, -1] },
-                            uResolution: { value: [window.innerWidth, window.innerHeight] },
+                            uResolution: { value: [window.innerWidth * dpr, window.innerHeight * dpr] },
                         },
                         cullFace: null,
                     });
@@ -354,7 +356,7 @@ export function CinematicHero({ isMuted, toggleMute, onVideoReady }: CinematicHe
                         // Update mouse uniform for hover color reveal
                         if (cylinderRef.current) {
                             cylinderRef.current.program.uniforms.uMouse.value = [mousePosRef.current.x, mousePosRef.current.y];
-                            cylinderRef.current.program.uniforms.uResolution.value = [window.innerWidth, window.innerHeight];
+                            cylinderRef.current.program.uniforms.uResolution.value = [window.innerWidth * dpr, window.innerHeight * dpr];
                         }
 
                         if (cylinderRef.current) {
