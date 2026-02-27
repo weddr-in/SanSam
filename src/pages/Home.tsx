@@ -29,7 +29,7 @@ const EVENTS: EventDetails[] = [
         mapsLink: 'https://maps.app.goo.gl/NX1AvDJwZVrC7zwy7',
         theme: 'evening',
         colorHex: '#B76E79',
-        palette: ['#000000', '#000080', '#013220'], // Black, Navy Blue, Dark Green
+        palette: ['#000000', '#000080', '#013220', '#36454F', '#4B0082', '#8B0000'], // Black, Navy Blue, Dark Green, Charcoal, Indigo, Dark Red
         icon: <Moon size={24} strokeWidth={1} />,
         outfit: {
             type: "Western Wear",
