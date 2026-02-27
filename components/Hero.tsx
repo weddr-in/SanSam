@@ -53,22 +53,13 @@ export const Hero: React.FC<HeroProps> = ({ isMuted, toggleMute, onVideoReady })
       }
     }, 15000);
 
-    const handleTimeUpdate = (data: any) => {
-      // 2 seconds of actual playback before dropping preloader
-      if (data.seconds >= 2 && !videoLoadedRef.current) {
-        console.log('Vimeo video has played for 2 seconds. Clearing preloader.');
-        videoLoadedRef.current = true;
-        clearTimeout(fallbackTimer);
-        setVideoFailed(false);
-        onVideoReady();
-        player.off('timeupdate', handleTimeUpdate);
-      }
-    };
-
-    // Event: Video started playing - wait 2 seconds of watch time!
+    // Event: Video started playing - drop preloader IMMEDAITELY
     player.on('play', () => {
-      console.log('Vimeo video playing, waiting for 2s of playback to clear preloader...');
-      player.on('timeupdate', handleTimeUpdate);
+      console.log('Vimeo video playing, dropping preloader immediately');
+      videoLoadedRef.current = true;
+      clearTimeout(fallbackTimer);
+      setVideoFailed(false);
+      onVideoReady();
     });
 
     // Event: Video loaded - try to play

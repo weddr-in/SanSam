@@ -118,7 +118,7 @@ export const Home: React.FC = () => {
     };
 
     return (
-        <main className="min-h-screen text-white selection:bg-white/20 selection:text-white overflow-x-hidden" style={{ background: 'linear-gradient(to bottom, #0a0a0a 0%, #1a1410 50%, #0f0d0c 100%)' }}>
+        <main className={`min-h-screen text-white selection:bg-white/20 selection:text-white ${isLoading ? 'h-screen overflow-hidden' : 'overflow-x-hidden'}`} style={{ background: 'linear-gradient(to bottom, #0a0a0a 0%, #1a1410 50%, #0f0d0c 100%)' }}>
 
             <Preloader isLoading={isLoading} />
 
