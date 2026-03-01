@@ -168,6 +168,21 @@
       animation: shimmer 3s infinite linear;
     }
 
+    /* Scroll indicator dot — full travel inside capsule */
+    @keyframes scrollDot {
+
+      0%,
+      100% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+
+      50% {
+        transform: translateX(-50%) translateY(16px);
+        opacity: 0.4;
+      }
+    }
+
     /* Safe Area Padding for Notched Phones */
     .pb-safe {
       padding-bottom: env(safe-area-inset-bottom);

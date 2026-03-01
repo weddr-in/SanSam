@@ -245,8 +245,8 @@ export const Hero: React.FC<HeroProps> = ({ isMuted, toggleMute, onVideoReady })
           {/* Mobile: Scroll to RSVP hint - Absolute Bottom Center — Bold & prominent */}
           <div className="sm:hidden absolute bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50" style={{ filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.3))' }}>
             <span className="font-sans text-[11px] tracking-[0.25em] uppercase text-white/90 font-semibold" style={{ textShadow: '0 0 8px rgba(255,255,255,0.3)' }}>SCROLL DOWN</span>
-            <div className="w-6 h-9 border-2 border-white/70 rounded-full flex items-start justify-center pt-1.5">
-              <div className="w-2 h-2.5 bg-white rounded-full animate-bounce" />
+            <div className="w-6 h-9 border-2 border-white/70 rounded-full relative overflow-hidden">
+              <div className="w-2 h-2 bg-white rounded-full absolute left-1/2 -translate-x-1/2" style={{ animation: 'scrollDot 1.8s ease-in-out infinite', top: '3px' }} />
             </div>
           </div>
 
