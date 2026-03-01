@@ -238,15 +238,15 @@ export const Hero: React.FC<HeroProps> = ({ isMuted, toggleMute, onVideoReady })
         <div className="flex justify-between items-end gap-2">
           {/* Desktop: Scroll to Explore */}
           <div className="hidden sm:flex flex-col gap-2">
-            <div className="h-[1px] w-12 bg-white/30" />
-            <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-white/50">Scroll to Explore</span>
+            <div className="h-[1px] w-12 bg-white/50" />
+            <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-white/70 font-semibold">Scroll to Explore</span>
           </div>
 
-          {/* Mobile: Scroll to RSVP hint - Absolute Bottom Center */}
-          <div className="sm:hidden absolute bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50">
-            <span className="font-sans text-[10px] tracking-[0.25em] uppercase text-white/70">Scroll to RSVP</span>
-            <div className="w-5 h-8 border-2 border-white/50 rounded-full flex items-start justify-center pt-1.5">
-              <div className="w-1.5 h-2 bg-white/80 rounded-full animate-bounce" />
+          {/* Mobile: Scroll to RSVP hint - Absolute Bottom Center — Bold & prominent */}
+          <div className="sm:hidden absolute bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50" style={{ filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.3))' }}>
+            <span className="font-sans text-[11px] tracking-[0.25em] uppercase text-white/90 font-semibold" style={{ textShadow: '0 0 8px rgba(255,255,255,0.3)' }}>SCROLL DOWN</span>
+            <div className="w-6 h-9 border-2 border-white/70 rounded-full flex items-start justify-center pt-1.5">
+              <div className="w-2 h-2.5 bg-white rounded-full animate-bounce" />
             </div>
           </div>
 

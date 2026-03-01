@@ -484,34 +484,36 @@ export function CinematicHero({ isMuted, toggleMute, onVideoReady }: CinematicHe
 
 
 
-            {/* Scroll indicator */}
+            {/* Scroll indicator — Bold & prominent */}
             <div
                 className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-10 pointer-events-none transition-opacity duration-500 ${hasScrolled ? 'opacity-0' : 'opacity-100'}`}
             >
-                <div className="flex flex-col items-center gap-2 animate-bounce">
+                <div className="flex flex-col items-center gap-3 animate-bounce" style={{ filter: 'drop-shadow(0 0 12px rgba(255,255,255,0.4))' }}>
                     <svg
-                        width="24"
-                        height="24"
+                        width="32"
+                        height="32"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="1"
-                        className="text-white/60"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-white"
                     >
                         <path d="M12 5v14M19 12l-7 7-7-7" />
                     </svg>
                     <span
-                        className="text-sm text-white/40"
-                        style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: '0.2em' }}
+                        className="text-sm text-white/80 font-semibold"
+                        style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: '0.25em', textShadow: '0 0 10px rgba(255,255,255,0.3)' }}
                     >
-                        Scroll
+                        SCROLL DOWN
                     </span>
                 </div>
             </div>
 
-            {/* Scroll container — 500vh driving the scroll animations */}
+            {/* Scroll container — 350vh driving the scroll animations (reduced from 500vh to prevent users getting stuck) */}
             <div id="film" className="relative z-20">
-                <div ref={containerRef} style={{ height: '500vh' }} />
+                <div ref={containerRef} style={{ height: '350vh' }} />
             </div>
         </>
     );

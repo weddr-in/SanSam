@@ -1075,21 +1075,54 @@ export const GameSection: React.FC = () => {
 
     useEffect(() => { fetchLeaderboard(); fetchTeamStats(); }, []);
 
-    const fetchLeaderboard = async () => {
-        const { data } = await supabase.from('leaderboard').select('*').eq('client_id', WEDDING_CLIENT_ID).order('score', { ascending: false }).limit(5);
-        if (data) setLeaderboard(data);
+    const fetchLeaderboard = async (retries = 3) => {
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                const { data, error } = await supabase.from('leaderboard').select('*').eq('client_id', WEDDING_CLIENT_ID).order('score', { ascending: false }).limit(5);
+                if (error) throw error;
+                if (data) {
+                    setLeaderboard(data);
+                    try { localStorage.setItem('sansam_leaderboard', JSON.stringify(data)); } catch { }
+                    return;
+                }
+            } catch (err) {
+                console.warn(`[Leaderboard] Fetch attempt ${attempt}/${retries} failed:`, err);
+                if (attempt < retries) await new Promise(r => setTimeout(r, 1000 * attempt));
+            }
+        }
+        // Fallback to cached data
+        try {
+            const cached = localStorage.getItem('sansam_leaderboard');
+            if (cached) { setLeaderboard(JSON.parse(cached)); console.log('[Leaderboard] Using cached data'); }
+        } catch { }
     };
 
-    const fetchTeamStats = async () => {
-        const { data } = await supabase.from('leaderboard').select('score, side').eq('client_id', WEDDING_CLIENT_ID);
-        if (data && data.length > 0) {
-            const bride = data.filter(p => p.side === 'bride');
-            const groom = data.filter(p => p.side === 'groom');
-            const brideTotal = bride.reduce((s, p) => s + p.score, 0);
-            const groomTotal = groom.reduce((s, p) => s + p.score, 0);
-            const total = brideTotal + groomTotal;
-            setTeamStats({ bridePercent: total > 0 ? Math.round((brideTotal / total) * 100) : 50, groomPercent: total > 0 ? Math.round((groomTotal / total) * 100) : 50, brideTotal, groomTotal, bridePlayers: bride.length, groomPlayers: groom.length });
+    const fetchTeamStats = async (retries = 3) => {
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                const { data, error } = await supabase.from('leaderboard').select('score, side').eq('client_id', WEDDING_CLIENT_ID);
+                if (error) throw error;
+                if (data && data.length > 0) {
+                    const bride = data.filter(p => p.side === 'bride');
+                    const groom = data.filter(p => p.side === 'groom');
+                    const brideTotal = bride.reduce((s, p) => s + p.score, 0);
+                    const groomTotal = groom.reduce((s, p) => s + p.score, 0);
+                    const total = brideTotal + groomTotal;
+                    const stats = { bridePercent: total > 0 ? Math.round((brideTotal / total) * 100) : 50, groomPercent: total > 0 ? Math.round((groomTotal / total) * 100) : 50, brideTotal, groomTotal, bridePlayers: bride.length, groomPlayers: groom.length };
+                    setTeamStats(stats);
+                    try { localStorage.setItem('sansam_teamstats', JSON.stringify(stats)); } catch { }
+                    return;
+                }
+            } catch (err) {
+                console.warn(`[TeamStats] Fetch attempt ${attempt}/${retries} failed:`, err);
+                if (attempt < retries) await new Promise(r => setTimeout(r, 1000 * attempt));
+            }
         }
+        // Fallback to cached data
+        try {
+            const cached = localStorage.getItem('sansam_teamstats');
+            if (cached) { setTeamStats(JSON.parse(cached)); console.log('[TeamStats] Using cached data'); }
+        } catch { }
     };
 
     // Game timer - using Date.now() for more accuracy on mobile (handles throttling better)
