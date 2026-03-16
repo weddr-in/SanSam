@@ -9,6 +9,10 @@
             "destination": "https://api.spotify.com/v1/$1"
         },
         {
+            "source": "/api/moments/:path*",
+            "destination": "/api/moments/:path*"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }
