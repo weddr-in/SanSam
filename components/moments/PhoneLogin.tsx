@@ -202,10 +202,10 @@ export function PhoneLogin() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
       {/* Content */}
-      <div className="relative z-10 min-h-screen flex flex-col justify-end pb-safe">
-        {/* Top branding — always visible */}
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-12">
+        {/* Branding */}
         <motion.div
-          className="absolute top-0 left-0 right-0 pt-12 pb-6 text-center"
+          className="mb-8 text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 1 }}
@@ -214,7 +214,7 @@ export function PhoneLogin() {
         </motion.div>
 
         {/* Main content area */}
-        <div className="px-6 pb-8 max-w-md mx-auto w-full">
+        <div className="max-w-md w-full">
           <AnimatePresence mode="wait">
 
             {/* ─── WELCOME SCREEN ─── */}
