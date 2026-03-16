@@ -31,7 +31,7 @@ export function MomentsEventSelector() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[#050505]">
+    <div className="min-h-screen flex flex-col bg-[#050505]">
       {/* Header — floating over content */}
       <motion.div
         className="relative z-20 flex items-center justify-between px-5 pt-8 pb-4 md:px-8"

@@ -202,7 +202,7 @@ export function PhoneLogin() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
       {/* Content */}
-      <div className="relative z-10 min-h-[100dvh] flex flex-col justify-end pb-safe">
+      <div className="relative z-10 min-h-screen flex flex-col justify-end pb-safe">
         {/* Top branding — always visible */}
         <motion.div
           className="absolute top-0 left-0 right-0 pt-12 pb-6 text-center"

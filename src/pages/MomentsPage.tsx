@@ -58,7 +58,7 @@ function MomentsContent() {
 
   if (loading) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-[#050505]">
+      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
         <div className="text-center">
           <div className="w-5 h-5 border border-[#d4af37]/30 border-t-[#d4af37] rounded-full animate-spin mx-auto" />
         </div>
@@ -67,7 +67,7 @@ function MomentsContent() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#050505] text-white">
+    <div className="min-h-screen bg-[#050505] text-white">
       {currentView === 'login' && <PhoneLogin />}
       {currentView === 'events' && <MomentsEventSelector />}
       {currentView === 'gallery' && <EventGallery />}

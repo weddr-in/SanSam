@@ -40,6 +40,8 @@ export function MomentsAuthProvider({ children }: { children: React.ReactNode })
           || session?.user?.user_metadata?.name
           || '',
       }));
+    }).catch(() => {
+      setState(prev => ({ ...prev, loading: false }));
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {

@@ -34,7 +34,7 @@ export function EventGallery() {
   if (!event) return null;
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[#050505]">
+    <div className="min-h-screen flex flex-col bg-[#050505]">
 
       {/* Cinematic header with event branding */}
       <motion.div
