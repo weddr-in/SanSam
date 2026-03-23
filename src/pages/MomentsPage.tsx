@@ -7,7 +7,7 @@ import { EventGallery } from '../../components/moments/EventGallery';
 
 function MomentsContent() {
   const { user, loading, guestName } = useMomentsAuth();
-  const { currentView, setView, lightboxOpen, closeLightbox, selectedEvent, setSelectedEvent, setPhotos } = useMomentsStore();
+  const { currentView, setView, lightboxOpen, closeLightbox, selectedEvent, setSelectedEvent, resetGallery } = useMomentsStore();
 
   useEffect(() => {
     if (loading) return;
@@ -42,7 +42,7 @@ function MomentsContent() {
       if (view === 'gallery') {
         e.preventDefault();
         setSelectedEvent(null);
-        setPhotos([]);
+        resetGallery();
         setView('events');
         window.history.pushState({ momentsView: 'events' }, '');
       } else if (view === 'events') {

@@ -11,15 +11,14 @@ const BG_IMAGES = [
 ];
 
 export function PhoneLogin() {
-  const { sendOtp, verifyOtp, setGuestName, sendEmailOtp, verifyEmailOtp, user, guestName: existingName } = useMomentsAuth();
+  const { phoneLogin, sendEmailOtp, verifyEmailOtp, setGuestName, user, guestName: existingName } = useMomentsAuth();
   const { setView } = useMomentsStore();
 
-  const [step, setStep] = useState<'welcome' | 'phone' | 'otp' | 'email' | 'email-otp' | 'name'>('welcome');
+  const [step, setStep] = useState<'welcome' | 'phone' | 'email' | 'email-otp' | 'name'>('welcome');
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [authMethod, setAuthMethod] = useState<'phone' | 'email'>('phone');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
@@ -53,19 +52,35 @@ export function PhoneLogin() {
     return digits;
   };
 
-  const canSendOtp = name.trim().length >= 2 && phone.replace(/\D/g, '').length === 10;
+  const canPhoneLogin = name.trim().length >= 2 && phone.replace(/\D/g, '').length === 10;
 
-  const handleSendOtp = async () => {
-    if (!canSendOtp) return;
+  // Phone: instant login — no OTP
+  const handlePhoneLogin = async () => {
+    if (!canPhoneLogin) return;
     setLoading(true);
     setError('');
-    const result = await sendOtp(phone.replace(/\D/g, ''));
+    const result = await phoneLogin(phone.replace(/\D/g, ''), name.trim());
     setLoading(false);
     if (result.error) {
       setError(result.error);
     } else {
-      setAuthMethod('phone');
-      setStep('otp');
+      setView('events');
+    }
+  };
+
+  // Email OTP handlers
+  const canSendEmailOtp = name.trim().length >= 2 && email.trim().length > 3 && email.includes('@');
+
+  const handleSendEmailOtp = async () => {
+    if (!canSendEmailOtp) return;
+    setLoading(true);
+    setError('');
+    const result = await sendEmailOtp(email.trim());
+    setLoading(false);
+    if (result.error) {
+      setError(result.error);
+    } else {
+      setStep('email-otp');
       setCountdown(30);
       setOtp(['', '', '', '', '', '']);
       setTimeout(() => otpRefs.current[0]?.focus(), 150);
@@ -79,8 +94,7 @@ export function PhoneLogin() {
     setOtp(newOtp);
     if (value && index < 5) otpRefs.current[index + 1]?.focus();
     if (newOtp.every(d => d) && value) {
-      if (authMethod === 'email') handleVerifyEmailOtp(newOtp.join(''));
-      else handleVerifyOtp(newOtp.join(''));
+      handleVerifyEmailOtp(newOtp.join(''));
     }
   };
 
@@ -96,44 +110,7 @@ export function PhoneLogin() {
     if (pasted.length === 6) {
       setOtp(pasted.split(''));
       otpRefs.current[5]?.focus();
-      if (authMethod === 'email') handleVerifyEmailOtp(pasted);
-      else handleVerifyOtp(pasted);
-    }
-  };
-
-  const handleVerifyOtp = async (token?: string) => {
-    const code = token || otp.join('');
-    if (code.length !== 6) return;
-    setLoading(true);
-    setError('');
-    const result = await verifyOtp(phone.replace(/\D/g, ''), code);
-    setLoading(false);
-    if (result.error) {
-      setError(result.error);
-      setOtp(['', '', '', '', '', '']);
-      otpRefs.current[0]?.focus();
-    } else {
-      await setGuestName(name.trim());
-      setView('events');
-    }
-  };
-
-  const canSendEmailOtp = name.trim().length >= 2 && email.trim().length > 3 && email.includes('@');
-
-  const handleSendEmailOtp = async () => {
-    if (!canSendEmailOtp) return;
-    setLoading(true);
-    setError('');
-    const result = await sendEmailOtp(email.trim());
-    setLoading(false);
-    if (result.error) {
-      setError(result.error);
-    } else {
-      setAuthMethod('email');
-      setStep('email-otp');
-      setCountdown(30);
-      setOtp(['', '', '', '', '', '']);
-      setTimeout(() => otpRefs.current[0]?.focus(), 150);
+      handleVerifyEmailOtp(pasted);
     }
   };
 
@@ -226,7 +203,6 @@ export function PhoneLogin() {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               >
-                {/* Title */}
                 <motion.h1
                   className="font-serif text-5xl md:text-6xl text-[#f5f0e8] font-light leading-[1.1] mb-3"
                   initial={{ opacity: 0, y: 20 }}
@@ -244,9 +220,7 @@ export function PhoneLogin() {
                   Capture & relive the magic of our celebration together
                 </motion.p>
 
-                {/* Login options */}
                 <div className="space-y-3">
-                  {/* Phone */}
                   <motion.button
                     onClick={() => setStep('phone')}
                     className="w-full flex items-center gap-4 px-5 py-4
@@ -264,7 +238,6 @@ export function PhoneLogin() {
                     <span className="font-sans text-[13px] text-white/70 tracking-wide">Continue with Phone</span>
                   </motion.button>
 
-                  {/* Email */}
                   <motion.button
                     onClick={() => setStep('email')}
                     className="w-full flex items-center gap-4 px-5 py-4
@@ -283,18 +256,10 @@ export function PhoneLogin() {
                     <span className="font-sans text-[13px] text-white/70 tracking-wide">Continue with Email</span>
                   </motion.button>
                 </div>
-
-                {/* Error */}
-                <AnimatePresence>
-                  {error && (
-                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                      className="text-red-400/80 text-xs font-sans mt-4 text-center">{error}</motion.p>
-                  )}
-                </AnimatePresence>
               </motion.div>
             )}
 
-            {/* ─── PHONE + NAME SCREEN ─── */}
+            {/* ─── PHONE + NAME SCREEN (instant login) ─── */}
             {step === 'phone' && (
               <motion.div
                 key="phone"
@@ -310,10 +275,9 @@ export function PhoneLogin() {
                 </button>
 
                 <h2 className="font-serif text-3xl text-[#f5f0e8] font-light mb-1">Enter your details</h2>
-                <p className="font-sans text-[12px] text-white/25 mb-8">We'll send you a verification code</p>
+                <p className="font-sans text-[12px] text-white/25 mb-8">Your name & phone to join the celebration</p>
 
                 <div className="space-y-5">
-                  {/* Name */}
                   <div className="relative">
                     <input
                       type="text"
@@ -330,14 +294,13 @@ export function PhoneLogin() {
                     />
                   </div>
 
-                  {/* Phone */}
                   <div className="relative">
                     <span className="absolute left-5 top-1/2 -translate-y-1/2 font-sans text-[13px] text-[#d4af37]/50 select-none">+91</span>
                     <input
                       type="tel"
                       value={phone}
                       onChange={(e) => { setPhone(formatPhone(e.target.value)); setError(''); }}
-                      onKeyDown={(e) => e.key === 'Enter' && canSendOtp && handleSendOtp()}
+                      onKeyDown={(e) => e.key === 'Enter' && canPhoneLogin && handlePhoneLogin()}
                       placeholder="99999 99999"
                       className="w-full bg-white/[0.06] backdrop-blur-md border border-white/[0.08]
                         pl-14 pr-5 py-4 text-[#f5f0e8] font-sans text-base tracking-wider
@@ -358,8 +321,8 @@ export function PhoneLogin() {
                 </AnimatePresence>
 
                 <motion.button
-                  onClick={handleSendOtp}
-                  disabled={loading || !canSendOtp}
+                  onClick={handlePhoneLogin}
+                  disabled={loading || !canPhoneLogin}
                   className="w-full mt-6 py-4 bg-[#d4af37]/15 border border-[#d4af37]/25
                     backdrop-blur-md font-sans text-[12px] tracking-[0.3em] uppercase text-[#d4af37]
                     disabled:opacity-25 disabled:cursor-not-allowed
@@ -367,85 +330,8 @@ export function PhoneLogin() {
                     active:scale-[0.98] transition-all duration-300"
                   whileTap={{ scale: 0.98 }}
                 >
-                  {loading ? <Spinner /> : 'Send Code'}
+                  {loading ? <Spinner /> : 'Enter Moments'}
                 </motion.button>
-              </motion.div>
-            )}
-
-            {/* ─── OTP SCREEN ─── */}
-            {step === 'otp' && (
-              <motion.div
-                key="otp"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.4 }}
-              >
-                <button onClick={() => { setStep('phone'); setOtp(['', '', '', '', '', '']); setError(''); }}
-                  className="font-sans text-[10px] tracking-[0.2em] uppercase text-white/25 hover:text-white/50 transition-colors mb-6 flex items-center gap-1.5">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15,18 9,12 15,6"/></svg>
-                  Back
-                </button>
-
-                <h2 className="font-serif text-3xl text-[#f5f0e8] font-light mb-1">Verification</h2>
-                <p className="font-sans text-[12px] text-white/25 mb-8">
-                  Code sent to <span className="text-[#d4af37]/50">+91 {phone}</span>
-                </p>
-
-                {/* OTP boxes */}
-                <div className="flex gap-2.5 mb-4" onPaste={handleOtpPaste}>
-                  {otp.map((digit, i) => (
-                    <input
-                      key={i}
-                      ref={(el) => { otpRefs.current[i] = el; }}
-                      type="text"
-                      inputMode="numeric"
-                      value={digit}
-                      onChange={(e) => handleOtpChange(i, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      className={`w-full aspect-square max-w-[56px] text-center text-xl font-sans
-                        backdrop-blur-md border transition-all duration-300
-                        ${digit
-                          ? 'bg-[#d4af37]/[0.08] border-[#d4af37]/30 text-[#f5f0e8]'
-                          : 'bg-white/[0.04] border-white/[0.08] text-white/60'}
-                        focus:outline-none focus:border-[#d4af37]/50 focus:bg-[#d4af37]/[0.06]`}
-                      maxLength={1}
-                      disabled={loading}
-                    />
-                  ))}
-                </div>
-
-                <AnimatePresence>
-                  {error && (
-                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                      className="text-red-400/80 text-xs font-sans mb-3">{error}</motion.p>
-                  )}
-                </AnimatePresence>
-
-                <motion.button
-                  onClick={() => handleVerifyOtp()}
-                  disabled={loading || otp.some(d => !d)}
-                  className="w-full py-4 bg-[#d4af37]/15 border border-[#d4af37]/25
-                    backdrop-blur-md font-sans text-[12px] tracking-[0.3em] uppercase text-[#d4af37]
-                    disabled:opacity-25 disabled:cursor-not-allowed
-                    hover:bg-[#d4af37]/25 active:scale-[0.98] transition-all duration-300"
-                  whileTap={{ scale: 0.98 }}
-                >
-                  {loading ? <Spinner /> : 'Verify & Enter'}
-                </motion.button>
-
-                <div className="text-center mt-5">
-                  {countdown > 0 ? (
-                    <p className="font-sans text-[10px] text-white/15">
-                      Resend in <span className="text-[#d4af37]/30 tabular-nums">{countdown}s</span>
-                    </p>
-                  ) : (
-                    <button onClick={() => { handleSendOtp(); setOtp(['', '', '', '', '', '']); }}
-                      className="font-sans text-[10px] tracking-wider uppercase text-[#d4af37]/30 hover:text-[#d4af37]/60 transition-colors">
-                      Resend Code
-                    </button>
-                  )}
-                </div>
               </motion.div>
             )}
 
@@ -468,7 +354,6 @@ export function PhoneLogin() {
                 <p className="font-sans text-[12px] text-white/25 mb-8">We'll send a verification code to your email</p>
 
                 <div className="space-y-5">
-                  {/* Name */}
                   <input
                     type="text"
                     value={name}
@@ -482,7 +367,6 @@ export function PhoneLogin() {
                       transition-all duration-500"
                     disabled={loading}
                   />
-                  {/* Email */}
                   <input
                     type="email"
                     value={email}
@@ -539,7 +423,6 @@ export function PhoneLogin() {
                   Code sent to <span className="text-[#d4af37]/50">{email}</span>
                 </p>
 
-                {/* OTP boxes */}
                 <div className="flex gap-2.5 mb-4" onPaste={handleOtpPaste}>
                   {otp.map((digit, i) => (
                     <input
@@ -596,7 +479,7 @@ export function PhoneLogin() {
               </motion.div>
             )}
 
-            {/* ─── NAME SCREEN (for email/google users) ─── */}
+            {/* ─── NAME SCREEN (for returning users without name) ─── */}
             {step === 'name' && (
               <motion.div
                 key="name"

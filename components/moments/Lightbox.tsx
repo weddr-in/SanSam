@@ -1,14 +1,18 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { useMomentsAuth } from '../../src/lib/moments/auth-context';
 import { useMomentsStore } from '../../src/lib/moments/store';
-import { toggleLike, deletePhoto } from '../../src/lib/moments/storage';
+import { toggleLike, deletePhoto, flagPhoto } from '../../src/lib/moments/storage';
 
 export function Lightbox() {
   const { user } = useMomentsAuth();
-  const { photos, lightboxOpen, lightboxIndex, closeLightbox, updatePhotoLike, removePhoto } = useMomentsStore();
+  const { photos, lightboxOpen, lightboxIndex, closeLightbox, updatePhotoLike, removePhoto, hidePhoto } = useMomentsStore();
   const [currentIndex, setCurrentIndex] = useState(lightboxIndex);
   const [direction, setDirection] = useState(0);
+  const [showFlagConfirm, setShowFlagConfirm] = useState(false);
+
+  // Prefetch cache for adjacent images
+  const prefetchCache = useRef<Set<string>>(new Set());
 
   const photo = photos[currentIndex];
 
@@ -18,6 +22,21 @@ export function Lightbox() {
     if (user.email && user.email.endsWith('@weddr.in')) return true;
     return false;
   };
+
+  // Prefetch next/prev images for smooth swiping
+  const prefetchAdjacent = useCallback((idx: number) => {
+    const indicesToPrefetch = [idx - 1, idx + 1, idx + 2];
+    indicesToPrefetch.forEach((i) => {
+      if (i >= 0 && i < photos.length) {
+        const url = photos[i].image_url;
+        if (!prefetchCache.current.has(url)) {
+          prefetchCache.current.add(url);
+          const img = new Image();
+          img.src = url;
+        }
+      }
+    });
+  }, [photos]);
 
   const handleDelete = async () => {
     if (!user || !photo) return;
@@ -30,9 +49,25 @@ export function Lightbox() {
     } catch (err) { console.error('Delete failed:', err); }
   };
 
+  const confirmFlag = async () => {
+    if (!user || !photo) return;
+    setShowFlagConfirm(false);
+    await flagPhoto(photo.id, user.id);
+    hidePhoto(photo.id);
+    if (photos.length <= 1) closeLightbox();
+    else if (currentIndex >= photos.length - 1) setCurrentIndex(prev => prev - 1);
+  };
+
   useEffect(() => {
     setCurrentIndex(lightboxIndex);
   }, [lightboxIndex]);
+
+  // Prefetch when index changes
+  useEffect(() => {
+    if (lightboxOpen) {
+      prefetchAdjacent(currentIndex);
+    }
+  }, [currentIndex, lightboxOpen, prefetchAdjacent]);
 
   // Lock body scroll
   useEffect(() => {
@@ -144,6 +179,13 @@ export function Lightbox() {
               </span>
 
               <div className="flex items-center gap-2">
+                <button onClick={() => setShowFlagConfirm(true)} title="Report inappropriate"
+                  className="w-10 h-10 flex items-center justify-center rounded-full
+                    bg-white/[0.06] backdrop-blur-md hover:bg-red-500/20 transition-colors">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5">
+                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
+                  </svg>
+                </button>
                 {canDeletePhoto(photo) && (
                   <button onClick={handleDelete}
                     className="w-10 h-10 flex items-center justify-center rounded-full
@@ -212,6 +254,54 @@ export function Lightbox() {
               </motion.div>
             </AnimatePresence>
           </div>
+
+          {/* Flag confirmation dialog */}
+          <AnimatePresence>
+            {showFlagConfirm && photo && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-[100] flex items-center justify-center px-6"
+              >
+                <div className="absolute inset-0 bg-black/60" onClick={() => setShowFlagConfirm(false)} />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  className="relative w-full max-w-[320px] bg-[#141414] border border-white/[0.08]
+                    shadow-[0_24px_80px_rgba(0,0,0,0.6)] overflow-hidden"
+                >
+                  <div className="px-6 py-6">
+                    <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20
+                      flex items-center justify-center mb-4">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.7)" strokeWidth="1.5">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
+                      </svg>
+                    </div>
+                    <h3 className="font-serif text-lg text-[#f5f0e8] font-light mb-1.5">Report this photo?</h3>
+                    <p className="font-sans text-[11px] text-white/30 leading-relaxed mb-6">
+                      This photo will be hidden from the gallery and sent for review by the hosts.
+                    </p>
+                    <div className="flex gap-3">
+                      <button onClick={() => setShowFlagConfirm(false)}
+                        className="flex-1 py-3 font-sans text-[11px] tracking-[0.2em] uppercase
+                          bg-white/[0.04] border border-white/[0.08] text-white/40
+                          hover:bg-white/[0.08] transition-colors">
+                        Cancel
+                      </button>
+                      <button onClick={confirmFlag}
+                        className="flex-1 py-3 font-sans text-[11px] tracking-[0.2em] uppercase
+                          bg-red-500/10 border border-red-500/20 text-red-400/80
+                          hover:bg-red-500/20 transition-colors">
+                        Report
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Bottom bar — ALWAYS visible */}
           <div className="absolute bottom-0 left-0 right-0 z-30

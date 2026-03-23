@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMomentsAuth } from '../../src/lib/moments/auth-context';
 import { useMomentsStore } from '../../src/lib/moments/store';
-import { fetchEventPhotos } from '../../src/lib/moments/storage';
+import { fetchEventPhotos, fetchFlaggedPhotos, unflagPhoto, deletePhoto } from '../../src/lib/moments/storage';
 import { EVENTS } from '../../src/lib/moments/types';
 import { UploadZone } from './UploadZone';
 import { PhotoCard } from './PhotoCard';
@@ -10,24 +10,102 @@ import { Lightbox } from './Lightbox';
 
 export function EventGallery() {
   const { user } = useMomentsAuth();
-  const { selectedEvent, setView, setSelectedEvent, photos, setPhotos, loadingPhotos, setLoadingPhotos } = useMomentsStore();
+  const {
+    selectedEvent, setView, setSelectedEvent,
+    photos, setPhotos, appendPhotos,
+    loadingPhotos, setLoadingPhotos,
+    loadingMore, setLoadingMore,
+    currentPage, setCurrentPage,
+    hasMore, setHasMore,
+    resetGallery,
+  } = useMomentsStore();
   const [showUpload, setShowUpload] = useState(false);
-  const galleryRef = useRef<HTMLDivElement>(null);
+  const [fetchError, setFetchError] = useState(false);
+  const [showFlagged, setShowFlagged] = useState(false);
+  const [flaggedPhotos, setFlaggedPhotos] = useState<any[]>([]);
+  const [loadingFlagged, setLoadingFlagged] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
+  const isAdmin = !!user?.email?.endsWith('@weddr.in');
   const event = EVENTS.find(e => e.id === selectedEvent);
 
-  useEffect(() => {
+  // Load first page
+  const loadPhotos = useCallback(() => {
     if (!selectedEvent || !user) return;
+    resetGallery();
     setLoadingPhotos(true);
-    fetchEventPhotos(selectedEvent, user.id)
-      .then(setPhotos)
-      .catch(console.error)
+    setFetchError(false);
+    fetchEventPhotos(selectedEvent, user.id, 0)
+      .then(({ photos: fetched, hasMore: more }) => {
+        setPhotos(fetched);
+        setCurrentPage(0);
+        setHasMore(more);
+      })
+      .catch(() => setFetchError(true))
       .finally(() => setLoadingPhotos(false));
   }, [selectedEvent, user]);
 
+  // Load next page
+  const loadMorePhotos = useCallback(() => {
+    if (!selectedEvent || !user || loadingMore || !hasMore) return;
+    const nextPage = currentPage + 1;
+    setLoadingMore(true);
+    fetchEventPhotos(selectedEvent, user.id, nextPage)
+      .then(({ photos: fetched, hasMore: more }) => {
+        appendPhotos(fetched);
+        setCurrentPage(nextPage);
+        setHasMore(more);
+      })
+      .catch(console.error)
+      .finally(() => setLoadingMore(false));
+  }, [selectedEvent, user, currentPage, loadingMore, hasMore]);
+
+  useEffect(() => {
+    loadPhotos();
+  }, [selectedEvent, user]);
+
+  // Infinite scroll: IntersectionObserver on sentinel element
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loadingPhotos) {
+          loadMorePhotos();
+        }
+      },
+      { rootMargin: '600px' } // Start loading 600px before sentinel is visible
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, loadingPhotos, loadMorePhotos]);
+
+  const loadFlagged = () => {
+    if (!selectedEvent || !isAdmin) return;
+    setLoadingFlagged(true);
+    fetchFlaggedPhotos(selectedEvent)
+      .then(setFlaggedPhotos)
+      .catch(console.error)
+      .finally(() => setLoadingFlagged(false));
+  };
+
+  const handleRestore = async (photoId: string) => {
+    await unflagPhoto(photoId);
+    setFlaggedPhotos(prev => prev.filter(p => p.id !== photoId));
+    loadPhotos();
+  };
+
+  const handleDeleteFlagged = async (photoId: string) => {
+    if (!user) return;
+    await deletePhoto(photoId, user.id, user.email);
+    setFlaggedPhotos(prev => prev.filter(p => p.id !== photoId));
+  };
+
   const handleBack = () => {
     setSelectedEvent(null);
-    setPhotos([]);
+    resetGallery();
     setView('events');
   };
 
@@ -63,17 +141,63 @@ export function EventGallery() {
           </div>
         </div>
 
-        <p className="font-sans text-[10px] text-white/20 tracking-wider ml-12">
-          {photos.length} moment{photos.length !== 1 ? 's' : ''} &middot; {event.date}
-        </p>
+        <div className="flex items-center gap-3 ml-12">
+          <p className="font-sans text-[10px] text-white/20 tracking-wider">
+            {photos.length} moment{photos.length !== 1 ? 's' : ''} &middot; {event.date}
+          </p>
+          {isAdmin && (
+            <button
+              onClick={() => { setShowFlagged(!showFlagged); if (!showFlagged) loadFlagged(); }}
+              className="font-sans text-[9px] tracking-[0.15em] uppercase px-2.5 py-1
+                bg-red-500/10 border border-red-500/20 text-red-400/70
+                hover:bg-red-500/20 transition-colors rounded-full"
+            >
+              {showFlagged ? 'Gallery' : 'Review Flagged'}
+            </button>
+          )}
+        </div>
 
-        {/* Thin gold line separator */}
         <div className="mt-4 h-px bg-gradient-to-r from-[#d4af37]/20 via-[#d4af37]/10 to-transparent" />
       </motion.div>
 
       {/* Gallery content */}
-      <div ref={galleryRef} className="flex-1 px-2 md:px-4 pb-24">
-        {loadingPhotos ? (
+      <div className="flex-1 px-2 md:px-4 pb-24">
+        {/* Admin: Flagged photos review */}
+        {showFlagged && isAdmin ? (
+          <div className="pt-3 px-2">
+            <h2 className="font-serif text-xl text-red-400/70 mb-4">Flagged Photos</h2>
+            {loadingFlagged ? (
+              <p className="font-sans text-[12px] text-white/20">Loading...</p>
+            ) : flaggedPhotos.length === 0 ? (
+              <p className="font-sans text-[12px] text-white/20">No flagged photos</p>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {flaggedPhotos.map(p => (
+                  <div key={p.id} className="relative bg-white/[0.02] border border-white/[0.06] overflow-hidden">
+                    <img src={p.image_url} alt="" className="w-full aspect-square object-cover" />
+                    <div className="p-2.5">
+                      <p className="font-sans text-[10px] text-white/30 truncate">By {p.uploader_name}</p>
+                      <div className="flex gap-2 mt-2">
+                        <button onClick={() => handleRestore(p.id)}
+                          className="flex-1 py-1.5 font-sans text-[10px] tracking-wider uppercase
+                            bg-green-500/10 border border-green-500/20 text-green-400/80
+                            hover:bg-green-500/20 transition-colors">
+                          Restore
+                        </button>
+                        <button onClick={() => handleDeleteFlagged(p.id)}
+                          className="flex-1 py-1.5 font-sans text-[10px] tracking-wider uppercase
+                            bg-red-500/10 border border-red-500/20 text-red-400/80
+                            hover:bg-red-500/20 transition-colors">
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : loadingPhotos ? (
           // Cinematic skeleton — staggered reveal shimmer
           <div className="columns-2 md:columns-3 lg:columns-4 gap-2 md:gap-3 pt-3">
             {Array.from({ length: 9 }).map((_, i) => (
@@ -91,6 +215,23 @@ export function EventGallery() {
               </motion.div>
             ))}
           </div>
+        ) : fetchError ? (
+          <motion.div
+            className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <p className="font-serif text-xl text-white/35 mb-2">Something went wrong</p>
+            <p className="font-sans text-[12px] text-white/15 mb-6">Could not load photos</p>
+            <button
+              onClick={loadPhotos}
+              className="px-8 py-3.5 bg-[#d4af37]/10 border border-[#d4af37]/20
+                font-sans text-[11px] tracking-[0.3em] uppercase text-[#d4af37]/80
+                hover:bg-[#d4af37]/20 active:scale-[0.97] transition-all duration-300"
+            >
+              Try Again
+            </button>
+          </motion.div>
         ) : photos.length === 0 ? (
           // Empty state — cinematic, inviting
           <motion.div
@@ -127,17 +268,34 @@ export function EventGallery() {
             </button>
           </motion.div>
         ) : (
-          // Masonry gallery — cinematic spacing
-          <motion.div
-            className="columns-2 md:columns-3 lg:columns-4 gap-2 md:gap-3 pt-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4 }}
-          >
-            {photos.map((photo, i) => (
-              <PhotoCard key={photo.id} photo={photo} index={i} />
-            ))}
-          </motion.div>
+          <>
+            {/* Masonry gallery — cinematic spacing */}
+            <motion.div
+              className="columns-2 md:columns-3 lg:columns-4 gap-2 md:gap-3 pt-3"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              {photos.map((photo, i) => (
+                <PhotoCard key={photo.id} photo={photo} index={i} />
+              ))}
+            </motion.div>
+
+            {/* Infinite scroll sentinel */}
+            <div ref={sentinelRef} className="w-full py-8 flex justify-center">
+              {loadingMore && (
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 border border-[#d4af37]/30 border-t-[#d4af37]/70 rounded-full animate-spin" />
+                  <span className="font-sans text-[10px] text-white/20 tracking-wider">Loading more moments...</span>
+                </div>
+              )}
+              {!hasMore && photos.length > 0 && (
+                <p className="font-sans text-[10px] text-white/10 tracking-wider">
+                  All moments loaded
+                </p>
+              )}
+            </div>
+          </>
         )}
       </div>
 
@@ -210,7 +368,7 @@ export function EventGallery() {
 
               {/* Upload zone */}
               <div className="px-5 pb-6">
-                <UploadZone />
+                <UploadZone onAllDone={() => setShowUpload(false)} />
               </div>
             </motion.div>
           </>

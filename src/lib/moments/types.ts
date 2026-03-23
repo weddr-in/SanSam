@@ -22,6 +22,8 @@ export interface MomentPhoto {
   created_at: string;
   width?: number;
   height?: number;
+  flagged?: boolean;
+  flagged_by?: string;
 }
 
 export interface PhotoLike {

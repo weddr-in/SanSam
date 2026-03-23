@@ -10,8 +10,9 @@ interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
-  sendOtp: (phone: string) => Promise<{ error?: string }>;
-  verifyOtp: (phone: string, token: string) => Promise<{ error?: string }>;
+  // Phone: instant login (no OTP) via server-side Supabase user creation
+  phoneLogin: (phone: string, guestName: string) => Promise<{ error?: string }>;
+  // Email: OTP via Supabase
   sendEmailOtp: (email: string) => Promise<{ error?: string }>;
   verifyEmailOtp: (email: string, token: string) => Promise<{ error?: string }>;
   setGuestName: (name: string) => void;
@@ -60,22 +61,43 @@ export function MomentsAuthProvider({ children }: { children: React.ReactNode })
     return () => subscription.unsubscribe();
   }, []);
 
-  const sendOtp = useCallback(async (phone: string): Promise<{ error?: string }> => {
-    const cleanPhone = phone.replace(/\D/g, '');
-    const fullPhone = cleanPhone.startsWith('91') ? `+${cleanPhone}` : `+91${cleanPhone}`;
-    const { error } = await supabase.auth.signInWithOtp({ phone: fullPhone });
-    if (error) return { error: error.message };
-    return {};
+  // ── Phone: instant login (no OTP needed) ──
+  const phoneLogin = useCallback(async (phone: string, guestName: string): Promise<{ error?: string }> => {
+    try {
+      const cleanPhone = phone.replace(/\D/g, '');
+      const fullPhone = cleanPhone.startsWith('91') ? `+${cleanPhone}` : `+91${cleanPhone}`;
+
+      const response = await fetch('/api/moments/firebase-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: fullPhone, guestName }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        return { error: data.error || 'Failed to authenticate' };
+      }
+
+      // Establish Supabase session via magic link token
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        token_hash: data.hashedToken,
+        type: 'magiclink',
+      });
+
+      if (verifyError) {
+        return { error: verifyError.message };
+      }
+
+      // Set guest name in user metadata
+      await supabase.auth.updateUser({ data: { guest_name: guestName, phone_number: fullPhone } });
+
+      return {};
+    } catch (err: any) {
+      return { error: err.message || 'Authentication failed' };
+    }
   }, []);
 
-  const verifyOtp = useCallback(async (phone: string, token: string): Promise<{ error?: string }> => {
-    const cleanPhone = phone.replace(/\D/g, '');
-    const fullPhone = cleanPhone.startsWith('91') ? `+${cleanPhone}` : `+91${cleanPhone}`;
-    const { error } = await supabase.auth.verifyOtp({ phone: fullPhone, token, type: 'sms' });
-    if (error) return { error: error.message };
-    return {};
-  }, []);
-
+  // ── Email OTP ──
   const sendEmailOtp = useCallback(async (email: string): Promise<{ error?: string }> => {
     const { error } = await supabase.auth.signInWithOtp({ email });
     if (error) return { error: error.message };
@@ -99,7 +121,12 @@ export function MomentsAuthProvider({ children }: { children: React.ReactNode })
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...state, sendOtp, verifyOtp, sendEmailOtp, verifyEmailOtp, setGuestName, signOut }}>
+    <AuthContext.Provider value={{
+      ...state,
+      phoneLogin,
+      sendEmailOtp, verifyEmailOtp,
+      setGuestName, signOut,
+    }}>
       {children}
     </AuthContext.Provider>
   );

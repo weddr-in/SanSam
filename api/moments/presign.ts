@@ -45,6 +45,11 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  // Ensure authenticated user can only upload as themselves
+  if (userId !== user.id) {
+    return res.status(403).json({ error: 'Cannot upload as another user' });
+  }
+
   // Validate event
   if (!['sangeet', 'reception', 'mahurtha'].includes(event)) {
     return res.status(400).json({ error: 'Invalid event' });
@@ -63,7 +68,7 @@ export default async function handler(req: any, res: any) {
       ContentType: contentType,
     });
 
-    const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 600 }); // 10 min
+    const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1 hour
 
     return res.status(200).json({
       uploadUrl,
