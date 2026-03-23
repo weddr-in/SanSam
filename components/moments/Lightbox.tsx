@@ -10,6 +10,7 @@ export function Lightbox() {
   const [currentIndex, setCurrentIndex] = useState(lightboxIndex);
   const [direction, setDirection] = useState(0);
   const [showFlagConfirm, setShowFlagConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Prefetch cache for adjacent images
   const prefetchCache = useRef<Set<string>>(new Set());
@@ -38,15 +39,17 @@ export function Lightbox() {
     });
   }, [photos]);
 
-  const handleDelete = async () => {
+  const confirmDelete = () => {
     if (!user || !photo) return;
-    if (!confirm('Delete this photo?')) return;
-    try {
-      await deletePhoto(photo.id, user.id, user.email);
-      removePhoto(photo.id);
-      if (photos.length <= 1) closeLightbox();
-      else if (currentIndex >= photos.length - 1) setCurrentIndex(prev => prev - 1);
-    } catch (err) { console.error('Delete failed:', err); }
+    setShowDeleteConfirm(false);
+    const photoId = photo.id;
+    // Optimistic: remove from UI instantly
+    if (photos.length <= 1) closeLightbox();
+    else if (currentIndex >= photos.length - 1) setCurrentIndex(prev => prev - 1);
+    removePhoto(photoId);
+    deletePhoto(photoId, user.id, user.email).catch(() => {
+      console.warn('Delete API failed for photo:', photoId);
+    });
   };
 
   const confirmFlag = async () => {
@@ -187,7 +190,7 @@ export function Lightbox() {
                   </svg>
                 </button>
                 {canDeletePhoto(photo) && (
-                  <button onClick={handleDelete}
+                  <button onClick={() => setShowDeleteConfirm(true)}
                     className="w-10 h-10 flex items-center justify-center rounded-full
                       bg-white/[0.06] backdrop-blur-md hover:bg-red-500/20 transition-colors">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.6)" strokeWidth="1.5">
@@ -296,6 +299,35 @@ export function Lightbox() {
                           hover:bg-red-500/20 transition-colors">
                         Report
                       </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Delete confirmation dialog */}
+          <AnimatePresence>
+            {showDeleteConfirm && photo && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="absolute inset-0 z-[100] flex items-center justify-center px-6">
+                <div className="absolute inset-0 bg-black/60" onClick={() => setShowDeleteConfirm(false)} />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  className="relative w-full max-w-[320px] bg-[#141414] border border-white/[0.08] shadow-[0_24px_80px_rgba(0,0,0,0.6)] overflow-hidden">
+                  <div className="px-6 py-6">
+                    <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.7)" strokeWidth="1.5">
+                        <polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </div>
+                    <h3 className="font-serif text-lg text-[#f5f0e8] font-light mb-1.5">Delete this photo?</h3>
+                    <p className="font-sans text-[11px] text-white/30 leading-relaxed mb-6">This photo will be permanently removed from the gallery.</p>
+                    <div className="flex gap-3">
+                      <button onClick={() => setShowDeleteConfirm(false)}
+                        className="flex-1 py-3 font-sans text-[11px] tracking-[0.2em] uppercase bg-white/[0.04] border border-white/[0.08] text-white/40 hover:bg-white/[0.08] transition-colors">Cancel</button>
+                      <button onClick={confirmDelete}
+                        className="flex-1 py-3 font-sans text-[11px] tracking-[0.2em] uppercase bg-red-500/10 border border-red-500/20 text-red-400/80 hover:bg-red-500/20 transition-colors">Delete</button>
                     </div>
                   </div>
                 </motion.div>

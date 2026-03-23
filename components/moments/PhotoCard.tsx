@@ -20,10 +20,10 @@ interface PhotoCardProps {
 export function PhotoCard({ photo, index }: PhotoCardProps) {
   const { user } = useMomentsAuth();
   const { openLightbox, updatePhotoLike, removePhoto, hidePhoto } = useMomentsStore();
-  const [deleting, setDeleting] = useState(false);
   const [flagging, setFlagging] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showFlagConfirm, setShowFlagConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const showDelete = canDelete(user?.id, user?.email, photo);
 
   // Intersection Observer for lazy rendering — only animate/render when near viewport
@@ -46,15 +46,21 @@ export function PhotoCard({ photo, index }: PhotoCardProps) {
     return () => observer.disconnect();
   }, []);
 
-  const handleDelete = async (e: React.MouseEvent) => {
+  const openDeleteConfirm = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!user || deleting) return;
-    if (!confirm('Delete this photo?')) return;
-    setDeleting(true);
-    try {
-      await deletePhoto(photo.id, user.id, user.email);
-      removePhoto(photo.id);
-    } catch { setDeleting(false); }
+    setShowMenu(false);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    if (!user) return;
+    setShowDeleteConfirm(false);
+    // Optimistic: remove from UI instantly, delete on server in background
+    removePhoto(photo.id);
+    deletePhoto(photo.id, user.id, user.email).catch(() => {
+      // If server fails, photo is already gone from UI — acceptable tradeoff
+      console.warn('Delete API failed for photo:', photo.id);
+    });
   };
 
   const openFlagConfirm = (e: React.MouseEvent) => {
@@ -231,7 +237,7 @@ export function PhotoCard({ photo, index }: PhotoCardProps) {
                     <FlagIcon />
                   </button>
                   {showDelete && (
-                    <button onClick={handleDelete} disabled={deleting} className="opacity-60 hover:opacity-100 transition-opacity">
+                    <button onClick={openDeleteConfirm} className="opacity-60 hover:opacity-100 transition-opacity">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.7)" strokeWidth="1.5">
                         <polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                       </svg>
@@ -253,13 +259,13 @@ export function PhotoCard({ photo, index }: PhotoCardProps) {
                     border border-white/[0.08] rounded-lg overflow-hidden shadow-xl"
                 >
                   {showDelete && (
-                    <button onClick={handleDelete} disabled={deleting}
+                    <button onClick={openDeleteConfirm}
                       className="flex items-center gap-2.5 px-4 py-2.5 w-full text-left
                         hover:bg-white/[0.06] transition-colors border-b border-white/[0.06]">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.7)" strokeWidth="1.5">
                         <polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                       </svg>
-                      <span className="font-sans text-[11px] text-red-400/80">{deleting ? 'Deleting...' : 'Delete'}</span>
+                      <span className="font-sans text-[11px] text-red-400/80">Delete</span>
                     </button>
                   )}
                   <button onClick={openFlagConfirm}
@@ -332,6 +338,56 @@ export function PhotoCard({ photo, index }: PhotoCardProps) {
                       >
                         Report
                       </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Delete confirmation dialog */}
+          <AnimatePresence>
+            {showDeleteConfirm && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="fixed inset-0 z-[9999] flex items-center justify-center px-6"
+              >
+                <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowDeleteConfirm(false)} />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                  className="relative w-full max-w-[320px] bg-[#141414] border border-white/[0.08]
+                    shadow-[0_24px_80px_rgba(0,0,0,0.6)] overflow-hidden"
+                >
+                  <div className="h-32 overflow-hidden">
+                    <img src={thumbnailSrc} alt="" className="w-full h-full object-cover opacity-40" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#141414]" />
+                  </div>
+                  <div className="px-6 pb-6 -mt-4 relative">
+                    <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20
+                      flex items-center justify-center mb-4">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.7)" strokeWidth="1.5">
+                        <polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </div>
+                    <h3 className="font-serif text-lg text-[#f5f0e8] font-light mb-1.5">Delete this photo?</h3>
+                    <p className="font-sans text-[11px] text-white/30 leading-relaxed mb-6">
+                      This photo will be permanently removed from the gallery.
+                    </p>
+                    <div className="flex gap-3">
+                      <button onClick={() => setShowDeleteConfirm(false)}
+                        className="flex-1 py-3 font-sans text-[11px] tracking-[0.2em] uppercase
+                          bg-white/[0.04] border border-white/[0.08] text-white/40
+                          hover:bg-white/[0.08] transition-colors">Cancel</button>
+                      <button onClick={confirmDelete}
+                        className="flex-1 py-3 font-sans text-[11px] tracking-[0.2em] uppercase
+                          bg-red-500/10 border border-red-500/20 text-red-400/80
+                          hover:bg-red-500/20 transition-colors">Delete</button>
                     </div>
                   </div>
                 </motion.div>
